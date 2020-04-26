@@ -891,7 +891,7 @@ autoplot(nn_ferror_us)
 
 Lets compare the performance of the NN to the benchmark and the VAR model.
 
-```{r nnetar comparation US}
+```{r nnetar comparison US}
 nn_vs_ar_us <- abs(nn_ferror_us) - abs(marusferror)
 nn_vs_ar_us
 
@@ -936,7 +936,7 @@ autoplot(nn_ferror_ea)
 
 Now I compare the performance of the models.
 
-```{r nnetar comparation EA}
+```{r nnetar comparison EA}
 nn_vs_ar_ea <- abs(nn_ferror_ea) - abs(mareaferror)
 nn_vs_ar_ea
 
@@ -980,7 +980,7 @@ autoplot(nn_ferror_nl)
 
 As usual, now I compare the forecast errors across models.
 
-```{r nnetar comparation NL}
+```{r nnetar comparison NL}
 nn_vs_ar_nl <- abs(nn_ferror_nl) - abs(marnlferror)
 nn_vs_ar_nl
 
@@ -1036,7 +1036,7 @@ autoplot(nn_ferror_cl)
 
 Once more, I compare the forecast errors across models.
 
-```{r nnetar comparation CL}
+```{r nnetar comparison CL}
 nn_vs_ar_cl <- abs(nn_ferror_cl) - abs(marclferror)
 nn_vs_ar_cl
 
@@ -1080,7 +1080,7 @@ autoplot(nn_ferror_mx)
 
 Finally, I compare the errors of the NN and both other models.
 
-```{r nnetar comparation MX}
+```{r nnetar comparison MX}
 nn_vs_ar_mx <- abs(nn_ferror_mx) - abs(marmxferror)
 nn_vs_ar_mx
 

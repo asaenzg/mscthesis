@@ -1,0 +1,121 @@
+---
+title: "Benchmark"
+author: "Andres A Saenz Guzman"
+date: "13/5/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries, results='hide'}
+library(ggplot2)
+library(tidyverse)
+library(stargazer)
+library(forecast)
+```
+
+
+Here I build the benchmark model for the proyect. The model consist in a naive first-order univariate autoregressive process, i.e., an AR(1). This model takes the following form:
+
+$\pi_{t+1} = \alpha + \beta \pi_t + \epsilon_{t+1}$,
+
+Where $\pi_t$ represent inflation at time period $t$, $\alpha$ is a constant, $\beta < 1$ is the persistence and $\epsilon_{t+1}$ is the estimation error.
+
+##Benchmark for the US
+
+```{r AR1 US}
+inf <- train_us[, 2]  #Inflation is stored in the second column.
+actual.value <- test_us[, 2]
+period.future <- test_us[, 1]
+
+benchmark <- Arima(inf, order = c(1,0,0))
+benchmark
+
+checkresiduals(benchmark)
+
+fcast.benchmark <- forecast(benchmark, h = 12)
+autoplot(fcast.benchmark)
+
+error.benchmark.us <- fcast.benchmark$mean - actual.value
+autoplot(error.benchmark.us)
+```
+
+## Benchmark for the EA
+
+```{r AR1 EA}
+inf <- train_ea[, 2]  #Inflation is stored in the second column.
+actual.value <- test_ea[, 2]
+period.future <- test_ea[, 1]
+
+benchmark <- Arima(inf, order = c(1,0,0))
+benchmark
+
+checkresiduals(benchmark)
+
+fcast.benchmark <- forecast(benchmark, h = 12)
+autoplot(fcast.benchmark)
+
+error.benchmark.ea <- fcast.benchmark$mean - actual.value
+autoplot(error.benchmark.ea)
+```
+
+## Benchmark for the NL
+
+```{r AR1 NL}
+inf <- train_nl[, 2]  #Inflation is stored in the second column.
+actual.value <- test_nl[, 2]
+period.future <- test_nl[, 1]
+
+benchmark <- Arima(inf, order = c(1,0,0))
+benchmark
+
+checkresiduals(benchmark)
+
+fcast.benchmark <- forecast(benchmark, h = 12)
+autoplot(fcast.benchmark)
+
+error.benchmark.nl <- fcast.benchmark$mean - actual.value
+autoplot(error.benchmark.nl)
+```
+
+## Benchmark for CL
+
+```{r AR1 CL}
+inf <- train_cl[, 2]  #Inflation is stored in the second column.
+actual.value <- test_cl[, 2]
+period.future <- test_cl[, 1]
+
+benchmark <- Arima(inf, order = c(1,0,0))
+benchmark
+
+checkresiduals(benchmark)
+
+fcast.benchmark <- forecast(benchmark, h = 12)
+autoplot(fcast.benchmark)
+
+error.benchmark.cl <- fcast.benchmark$mean - actual.value
+autoplot(error.benchmark.cl)
+```
+
+## Benchmark for MX
+
+```{r AR1 MX}
+inf <- train_mx[, 2]  #Inflation is stored in the second column.
+actual.value <- test_mx[, 2]
+period.future <- test_mx[, 1]
+
+benchmark <- Arima(inf, order = c(1,0,0))
+benchmark
+
+checkresiduals(benchmark)
+
+fcast.benchmark <- forecast(benchmark, h = 12)
+autoplot(fcast.benchmark)
+
+error.benchmark.mx <- fcast.benchmark$mean - actual.value
+autoplot(error.benchmark.mx)
+```
+
+

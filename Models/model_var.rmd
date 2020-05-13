@@ -1,0 +1,148 @@
+---
+title: "VAR"
+author: "Andres A Saenz Guzman"
+date: "13/5/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries, results='hide'}
+library(ggplot2)
+library(tidyverse)
+library(vars)
+library(stargazer)
+library(forecast)
+```
+
+
+Here I present a restricted VAR model for each economy. The model takes into account the nominal interest rate, the money supply M2, the output gap, unemployment rate, real wages YoY growth and annual changes in the RER. The idea of a restricted VAR is that there are no contemporaneous variables in the model equations, thus it can be usd in practice, since all information is available at the time of doing forecasts. Although VAR models are able to produce predictions for all variables involved, I will be focusing on inflation.
+
+##VAR for the US
+
+The first step is to choose an appropriate number of lags for the model. Since Ventzislav and Lutz (2005) sugests that Akakike's Information Criterion (AIC) tends to produce the most accurate structural and semi-structural impulse response, I will be using this criterion.
+
+```{r VAR US}
+predictors <- length(dataUS)
+
+data.var.order <- dataUS[, 2:predictors] #Column 1 is a dates array
+var.order <- VARselect(data.var.order, type = "const", lag.max = 12)[["selection"]]
+var.order <- as.numeric(var.order[1]) #var.order[1] = AIC
+
+data.var <- dataUS[1:(nrow(train_us) + var.order), 2:predictors]
+m.var <- VAR(data.var, p = var.order) 
+m.var
+
+checkresiduals(m.var$varresult$infUS)
+
+acf(resid(m.var))
+
+fcast.var <- forecast(m.var$datamat$infUS , h = 12)
+autoplot(fcast.var)
+
+error.var.us <- fcast.var$mean - test_us[, 2] #Inflation is in column 2
+autoplot(error.var.us)
+```
+
+
+##VAR for the EA
+
+```{r VAR EA}
+predictors <- length(dataEA)
+
+data.var.order <- dataEA[, 2:predictors] #Column 1 is a dates array
+var.order <- VARselect(data.var.order, type = "const", lag.max = 12)[["selection"]]
+var.order <- as.numeric(var.order[1]) #var.order[1] = AIC
+
+data.var <- dataEA[1:(nrow(train_ea) + var.order), 2:predictors]
+m.var <- VAR(data.var, p = var.order) 
+m.var
+
+checkresiduals(m.var$varresult$infEA)
+
+acf(resid(m.var))
+
+fcast.var <- forecast(m.var$datamat$infEA , h = 12)
+autoplot(fcast.var)
+
+error.var.ea <- fcast.var$mean - test_ea[, 2] #Inflation is in column 2
+autoplot(error.var.ea)
+```
+
+
+
+
+##VAR for the NL
+
+```{r VAR NL}
+predictors <- length(dataNL)
+
+data.var.order <- dataNL[, 2:predictors] #Column 1 is a dates array
+var.order <- VARselect(data.var.order, type = "const", lag.max = 12)[["selection"]]
+var.order <- as.numeric(var.order[1]) #var.order[1] = AIC
+
+data.var <- dataNL[1:(nrow(train_nl) + var.order), 2:predictors]
+m.var <- VAR(data.var, p = var.order) 
+m.var
+
+checkresiduals(m.var$varresult$infNL)
+
+acf(resid(m.var))
+
+fcast.var <- forecast(m.var$datamat$infNL , h = 12)
+autoplot(fcast.var)
+
+error.var.nl <- fcast.var$mean - test_nl[, 2] #Inflation is in column 2
+autoplot(error.var.nl)
+```
+
+
+
+##VAR for CL
+```{r VAR CL}
+predictors <- length(dataCL)
+
+data.var.order <- dataCL[, 2:predictors] #Column 1 is a dates array
+var.order <- VARselect(data.var.order, type = "const", lag.max = 12)[["selection"]]
+var.order <- as.numeric(var.order[1]) #var.order[1] = AIC
+
+data.var <- dataCL[1:(nrow(train_cl) + var.order), 2:predictors]
+m.var <- VAR(data.var, p = var.order) 
+m.var
+
+checkresiduals(m.var$varresult$infCL)
+
+acf(resid(m.var))
+
+fcast.var <- forecast(m.var$datamat$infCL , h = 12)
+autoplot(fcast.var)
+
+error.var.cl <- fcast.var$mean - test_cl[, 2] #Inflation is in column 2
+autoplot(error.var.cl)
+```
+
+##VAR for MX
+
+```{r VAR MX}
+predictors <- length(dataMX)
+
+data.var.order <- dataMX[, 2:predictors] #Column 1 is a dates array
+var.order <- VARselect(data.var.order, type = "const", lag.max = 12)[["selection"]]
+var.order <- as.numeric(var.order[1]) #var.order[1] = AIC
+
+data.var <- dataMX[1:(nrow(train_mx) + var.order), 2:predictors]
+m.var <- VAR(data.var, p = var.order) 
+m.var
+
+checkresiduals(m.var$varresult$infMX)
+
+acf(resid(m.var))
+
+fcast.var <- forecast(m.var$datamat$infMX , h = 12)
+autoplot(fcast.var)
+
+error.var.mx <- fcast.var$mean - test_mx[, 2] #Inflation is in column 2
+autoplot(error.var.mx)
+```

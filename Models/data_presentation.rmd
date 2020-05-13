@@ -1,0 +1,459 @@
+---
+title: "Data_visualization"
+author: "Andres A Saenz Guzman"
+date: "12/5/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, results = 'hide')
+```
+
+```{r libraries, results='hide'}
+library(ggplot2)
+library(tidyverse)
+library(readxl)
+```
+
+
+In this R Markdown I present monthly data for the United States (US), the Euro Area (EA), the Netherlands (NL), Chile (CL) and Mexico (MX). The dependent variable is inflation, while predictors (independent variables) are monetary policy instruments (interest rate and money supply M2), output gap, annual change in real wages, unemployment rate and the annual variation in the real exchange rate. In order to calculate a monthly output gap I use Industrial Activity Indices for all countries in the sample and filter the data with a one sided HP filter with a smoothing coefficient of 14400 in Excel in order to not capture future information in the processed data. Similarly, and given that with economic growth comes a natural growth in money supply, I applied a one sided HP filter with $\lambda = 14400$. This way, the data represent changes in the M2 money supply unrelated to growth in GDP. Finally, all data is expresed in similar magnitudes.
+
+##Data for the US
+
+```{r data for the US, echo=TRUE, results='hide'}
+infUS <- read_excel("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Data/US_Infl.xlsx")
+infUS <- as.numeric(infUS$...3[71:371])
+
+OutputGapUS <- read_excel("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Data/US_output_gap_proxy_Industrial_Activity.xlsx")
+OutputGapUS <- as.numeric(OutputGapUS$...5[71:371])
+
+intrateUS <- read_excel("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Data/US_interest_rate.xlsx")
+intrateUS <- as.numeric(intrateUS$...2[65:365])/100
+
+M2US <- read_excel("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Data/US_M2.xlsx")
+M2US <- as.numeric(M2US$...10[67:367])
+
+urateUS <- read_excel("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Data/US_u_rate.xls")
+urateUS <- as.numeric(urateUS$...2[71:371])/100
+
+RERUS <- read_excel("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Data/US_RER.xlsx")
+RERUS <- as.numeric(RERUS$...3[23:323])
+
+nomWUS <- read_excel("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Data/US_nom_wages.xlsx")
+nomWUS <- as.numeric(nomWUS$...3[71:371])
+realWUS <- nomWUS - infUS
+
+nmonths = 301
+mdate <- seq(as.Date("1995-1-1"), by = "month", length.out = nmonths)
+
+dataUS <- data.frame(mdate, infUS, intrateUS, M2US, OutputGapUS, urateUS, RERUS, realWUS, row.names = NULL)
+```
+
+The previous code chunk reads the data and creates a general data frame with US data. Now I will divide the data into training and test data. The test data is composed by the last year, while the training data correspond to all previous time periods.
+
+```{r US data divided}
+train_us <- dataUS[1:289,]
+test_us <- dataUS[290:301,]
+
+```
+
+Bellow is the data visualization for the US.
+
+```{r US data visualization, echo='FALSE'}
+
+pus1colours <- c("Inflation" = "darkred", "Interest Rate" = "steelblue")
+pus1 <- ggplot(data = dataUS, aes(x = mdate)) + 
+  geom_line(aes(y = infUS, color = "Inflation")) +
+  geom_line(aes(y = intrateUS, color = "Interest Rate")) +
+  labs(x = "", y = "", color = "Legend", title = "Inflation and Interest Rate (US)") +
+  scale_color_manual(values = pus1colours)
+ 
+pus2colours <- c("Inflation" = "darkred", "M2" = "steelblue")
+pus2 <- ggplot(data = dataUS, aes(x = mdate)) + 
+  geom_line(aes(y = infUS, color = "Inflation")) +
+  geom_line(aes(y = M2US, color = "M2")) +
+  labs(x = "", y = "", color = "Legend", title = "Inflation and M2 Money Supply (US)") +
+  scale_color_manual(values = pus2colours)
+
+pus3colours <- c("Inflation" = "darkred", "Output Gap" = "steelblue")
+pus3 <- ggplot(data = dataUS, aes(x = mdate)) + 
+  geom_line(aes(y = infUS, color = "Inflation")) +
+  geom_line(aes(y = OutputGapUS, color = "Output Gap")) +
+  labs(x = "", y = "", color = "Legend", title = "Inflation and Output Gap (US)") +
+  scale_color_manual(values = pus3colours)
+
+pus4colours <- c("Inflation" = "darkred", "Unemployment Rate" = "steelblue")
+pus4 <- ggplot(data = dataUS, aes(x = mdate)) + 
+  geom_line(aes(y = infUS, color = "Inflation")) +
+  geom_line(aes(y = urateUS, color = "Unemployment Rate")) +
+  labs(x = "", y = "", color = "Legend", title = "Inflation and Unemployment Rate (US)") +
+  scale_color_manual(values = pus4colours)
+
+pus5colours <- c("Inflation" = "darkred", "Real Exchange Rate" = "steelblue")
+pus5 <- ggplot(data = dataUS, aes(x = mdate)) + 
+  geom_line(aes(y = infUS, color = "Inflation")) +
+  geom_line(aes(y = RERUS, color = "Real Exchange Rate")) +
+  labs(x = "", y = "", color = "Legend", title = "Inflation and Real Exchange Rate (US)") +
+  scale_color_manual(values = pus5colours)
+
+pus6colours <- c("Inflation" = "darkred", "Real Wages" = "steelblue")
+pus6 <- ggplot(data = dataUS, aes(x = mdate)) + 
+  geom_line(aes(y = infUS, color = "Inflation")) +
+  geom_line(aes(y = realWUS, color = "Real Wages")) +
+  labs(x = "", y = "", color = "Legend", title = "Inflation and Real Wages (US)") +
+  scale_color_manual(values = pus6colours)
+
+pus1
+pus2
+pus3
+pus4
+pus5
+pus6
+```
+
+##Data for the EA
+
+Now I proceed to do the same for the EA.
+
+```{r data EA, echo=TRUE, results='hide'}
+infEA <- read_excel("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Data/EA_Infl.xlsx")
+infEA <- as.numeric(infEA$...3[29:281]) #283 = march 2020
+
+intrateEA <- read_excel("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Data/EA_interest_rate.xlsx") #Need to update the data
+intrateEA <- as.numeric(intrateEA$...3[11:263]) #265 = march 2020
+
+M2EA <- read_excel("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Data/EA_M2.xlsx")
+M2EA <- as.numeric(M2EA$...5[233:485]) #486 = February 2020
+
+OutputGapEA <- read_excel("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Data/EA_Ind_prod.xlsx")
+OutputGapEA <- as.numeric(OutputGapEA$...5[101:353]) #353 = January 2020
+
+urateEA <- read_excel("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Data/EA_u_rate.xlsx")
+urateEA <- as.numeric(urateEA$...3[14:266]) #267 = February 2020
+
+REREA <- read_excel("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Data/EA_RER.xlsx")
+REREA <- as.numeric(REREA$...3[71:323]) #324 = February 2020
+
+nmonthsEA <- 253
+mdateEA <- seq(as.Date("1999-1-1"), by = "month", length.out = nmonthsEA)
+
+dataEA <- data.frame(mdateEA, infEA, intrateEA, M2EA, OutputGapEA, urateEA, REREA, row.names = NULL)
+```
+```{r EA data divided}
+train_ea <- dataEA[1:241,]
+test_ea <- dataEA[242:253,]
+
+```
+And the visualization of EA data.
+
+```{r Plots data EA, echo=FALSE}
+pea1colours <- c("Inflation" = "darkred", "Interest Rate" = "steelblue")
+pea1 <- ggplot(data = dataEA, aes(x = mdateEA)) + 
+  geom_line(aes(y = infEA, color = "Inflation")) +
+  geom_line(aes(y = intrateEA, color = "Interest Rate")) +
+  labs(x = "", y = "", color = "Legend", title = "Inflation and Interest Rate (EA)") +
+  scale_color_manual(values = pea1colours)
+ 
+pea2colours <- c("Inflation" = "darkred", "M2" = "steelblue")
+pea2 <- ggplot(data = dataEA, aes(x = mdateEA)) + 
+  geom_line(aes(y = infEA, color = "Inflation")) +
+  geom_line(aes(y = M2EA, color = "M2")) +
+  labs(x = "", y = "", color = "Legend", title = "Inflation and M2 Money Supply (EA)") +
+  scale_color_manual(values = pea2colours)
+
+pea3colours <- c("Inflation" = "darkred", "Output Gap" = "steelblue")
+pea3 <- ggplot(data = dataEA, aes(x = mdateEA)) + 
+  geom_line(aes(y = infEA, color = "Inflation")) +
+  geom_line(aes(y = OutputGapEA, color = "Output Gap")) +
+  labs(x = "", y = "", color = "Legend", title = "Inflation and Output Gap (EA)") +
+  scale_color_manual(values = pea3colours)
+
+pea4colours <- c("Inflation" = "darkred", "Unemployment Rate" = "steelblue")
+pea4 <- ggplot(data = dataEA, aes(x = mdateEA)) + 
+  geom_line(aes(y = infEA, color = "Inflation")) +
+  geom_line(aes(y = urateEA, color = "Unemployment Rate")) +
+  labs(x = "", y = "", color = "Legend", title = "Inflation and Unemployment Rate (EA)") +
+  scale_color_manual(values = pea4colours)
+
+pea5colours <- c("Inflation" = "darkred", "Real Exchange Rate" = "steelblue")
+pea5 <- ggplot(data = dataEA, aes(x = mdateEA)) + 
+  geom_line(aes(y = infEA, color = "Inflation")) +
+  geom_line(aes(y = REREA, color = "Real Exchange Rate")) +
+  labs(x = "", y = "", color = "Legend", title = "Inflation and Real Exchange Rate (EA)") +
+  scale_color_manual(values = pea5colours)
+
+pea1
+pea2
+pea3
+pea4
+pea5
+
+```
+
+##Data for the NL
+
+Now, I load the data for the NL.
+
+```{r load data NL, echo=TRUE, results='hide'}
+infNL <- read_excel("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Data/NL_Infl.xlsx")
+infNL <- as.numeric(infNL$...2[29:281])/100
+
+intrateNL <- intrateEA 
+
+M2NL <- M2EA 
+
+OutputGapNL <- read_excel("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Data/NL_Ind_prod.xlsx") #Need to update the data
+OutputGapNL <- as.numeric(OutputGapNL$...5[119:371])
+
+urateNL <- read_excel("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Data/NL_u_rate.xlsx")
+urateNL <- as.numeric(urateNL$...3[197:449]) 
+
+RERNL <- REREA
+
+nomWNL <- read_excel("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Data/NL_wages_index.xlsx")
+nomWNL <- as.numeric(nomWNL$...3[119:371])
+realWNL <- nomWNL - infNL
+
+nmonthsNL <- 253
+mdateNL <- seq(as.Date("1999-1-1"), by = "month", length.out = nmonthsNL)
+
+dataNL <- data.frame(mdateNL, infNL, intrateNL, M2NL, OutputGapNL, urateNL, RERNL, realWNL, row.names = NULL)
+```
+```{r EA data divided}
+train_nl <- dataNL[1:241,]
+test_nl <- dataNL[242:253,]
+
+```
+
+And the data visualization.
+
+```{r data for the NL, echo=FALSE}
+pnl1colours <- c("Inflation" = "darkred", "Interest Rate" = "steelblue")
+pnl1 <- ggplot(data = dataNL, aes(x = mdateNL)) + 
+  geom_line(aes(y = infNL, color = "Inflation")) +
+  geom_line(aes(y = intrateNL, color = "Interest Rate")) +
+  labs(x = "", y = "", color = "Legend", title = "Inflation and Interest Rate (NL)") +
+  scale_color_manual(values = pnl1colours)
+ 
+pnl2colours <- c("Inflation" = "darkred", "M2" = "steelblue")
+pnl2 <- ggplot(data = dataNL, aes(x = mdateNL)) + 
+  geom_line(aes(y = infNL, color = "Inflation")) +
+  geom_line(aes(y = M2NL, color = "M2")) +
+  labs(x = "", y = "", color = "Legend", title = "Inflation and M2 Money Supply (NL)") +
+  scale_color_manual(values = pnl2colours)
+
+pnl3colours <- c("Inflation" = "darkred", "Output Gap" = "steelblue")
+pnl3 <- ggplot(data = dataNL, aes(x = mdateNL)) + 
+  geom_line(aes(y = infNL, color = "Inflation")) +
+  geom_line(aes(y = OutputGapNL, color = "Output Gap")) +
+  labs(x = "", y = "", color = "Legend", title = "Inflation and Output Gap (NL)") +
+  scale_color_manual(values = pnl3colours)
+
+pnl4colours <- c("Inflation" = "darkred", "Unemployment Rate" = "steelblue")
+pnl4 <- ggplot(data = dataNL, aes(x = mdateNL)) + 
+  geom_line(aes(y = infNL, color = "Inflation")) +
+  geom_line(aes(y = urateNL, color = "Unemployment Rate")) +
+  labs(x = "", y = "", color = "Legend", title = "Inflation and Unemployment Rate (NL)") +
+  scale_color_manual(values = pnl4colours)
+
+pnl5colours <- c("Inflation" = "darkred", "Real Exchange Rate" = "steelblue")
+pnl5 <- ggplot(data = dataNL, aes(x = mdateNL)) + 
+  geom_line(aes(y = infNL, color = "Inflation")) +
+  geom_line(aes(y = RERNL, color = "Real Exchange Rate")) +
+  labs(x = "", y = "", color = "Legend", title = "Inflation and Real Exchange Rate (NL)") +
+  scale_color_manual(values = pnl5colours)
+
+pnl6colours <- c("Inflation" = "darkred", "Real Wages" = "steelblue")
+pnl6 <- ggplot(data = dataNL, aes(x = mdateNL)) + 
+  geom_line(aes(y = infNL, color = "Inflation")) +
+  geom_line(aes(y = realWNL, color = "Real Wages")) +
+  labs(x = "", y = "", color = "Legend", title = "Inflation and Real Wages (NL)") +
+  scale_color_manual(values = pnl6colours)
+
+pnl1
+pnl2
+pnl3
+pnl4
+pnl5
+pnl6
+```
+
+##Data for CL
+
+Next is the data for CL.
+
+```{r data for CL, echo=TRUE, results='hide'}
+OutputGapCL <- read_excel("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Data/CL_Ind_prod.xlsx")
+OutputGapCL <- as.numeric(OutputGapCL$HP_CYCLE[37:326])
+
+infCL <- read_excel("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Data/CL_Infl.xlsx")
+infCL <- as.numeric(infCL$`Inflation`[13:302])
+
+intrateCL <- read_excel("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Data/CL_interest_rate.xlsx")
+intrateCL <- as.numeric(intrateCL$...3[11:300])
+
+M2CL <- read_excel("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Data/CL_M2.xlsx")
+M2CL <- as.numeric(M2CL$...5[27:316])
+
+urateCL <- read_excel("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Data/CL_u_rate.xlsx")
+urateCL <- as.numeric(urateCL$`x/100`[25:314])
+
+RERCL <- read_excel("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Data/CL_E_RER.xlsx")
+RERCL <- as.numeric(RERCL$...4[27:316])
+
+realWCL <- read_excel("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Data/CL_real_W.xlsx")
+realWCL <- as.numeric(realWCL$`RW09=100`[37:326])
+
+
+nmonthsCL = 290
+mdateCL <- seq(as.Date("1996-1-1"), by = "month", length.out = nmonthsCL)
+
+dataCL <- data.frame(mdateCL, infCL, intrateCL, M2CL, OutputGapCL, urateCL, RERCL, realWCL, row.names = NULL)
+```
+```{r EA data divided}
+train_cl <- dataCL[1:278,]
+test_cl <- dataCL[279:290,]
+
+```
+And CL data viasualization.
+
+```{r data for the CL, echo=FALSE}
+pcl1colours <- c("Inflation" = "darkred", "Interest Rate" = "steelblue")
+pcl1 <- ggplot(data = dataCL, aes(x = mdateCL)) + 
+  geom_line(aes(y = infCL, color = "Inflation")) +
+  geom_line(aes(y = intrateCL, color = "Interest Rate")) +
+  labs(x = "", y = "", color = "Legend", title = "Inflation and Interest Rate (CL)") +
+  scale_color_manual(values = pcl1colours)
+ 
+pcl2colours <- c("Inflation" = "darkred", "M2" = "steelblue")
+pcl2 <- ggplot(data = dataCL, aes(x = mdateCL)) + 
+  geom_line(aes(y = infCL, color = "Inflation")) +
+  geom_line(aes(y = M2CL, color = "M2")) +
+  labs(x = "", y = "", color = "Legend", title = "Inflation and M2 Money Supply (CL)") +
+  scale_color_manual(values = pcl2colours)
+
+pcl3colours <- c("Inflation" = "darkred", "Output Gap" = "steelblue")
+pcl3 <- ggplot(data = dataCL, aes(x = mdateCL)) + 
+  geom_line(aes(y = infCL, color = "Inflation")) +
+  geom_line(aes(y = OutputGapCL, color = "Output Gap")) +
+  labs(x = "", y = "", color = "Legend", title = "Inflation and Output Gap (CL)") +
+  scale_color_manual(values = pcl3colours)
+
+pcl4colours <- c("Inflation" = "darkred", "Unemployment Rate" = "steelblue")
+pcl4 <- ggplot(data = dataCL, aes(x = mdateCL)) + 
+  geom_line(aes(y = infCL, color = "Inflation")) +
+  geom_line(aes(y = urateCL, color = "Unemployment Rate")) +
+  labs(x = "", y = "", color = "Legend", title = "Inflation and Unemployment Rate (CL)") +
+  scale_color_manual(values = pcl4colours)
+
+pcl5colours <- c("Inflation" = "darkred", "Real Exchange Rate" = "steelblue")
+pcl5 <- ggplot(data = dataCL, aes(x = mdateCL)) + 
+  geom_line(aes(y = infCL, color = "Inflation")) +
+  geom_line(aes(y = RERCL, color = "Real Exchange Rate")) +
+  labs(x = "", y = "", color = "Legend", title = "Inflation and Real Exchange Rate (CL)") +
+  scale_color_manual(values = pcl5colours)
+
+pcl6colours <- c("Inflation" = "darkred", "Real Wages" = "steelblue")
+pcl6 <- ggplot(data = dataCL, aes(x = mdateCL)) + 
+  geom_line(aes(y = infCL, color = "Inflation")) +
+  geom_line(aes(y = realWCL, color = "Real Wages")) +
+  labs(x = "", y = "", color = "Legend", title = "Inflation and Real Wages (CL)") +
+  scale_color_manual(values = pcl6colours)
+
+pcl1
+pcl2
+pcl3
+pcl4
+pcl5
+pcl6
+```
+
+##Data for MX
+
+The final data set is for MX.
+
+```{r data for MX, echo=TRUE, results='hide'}
+OutputGapMX <- read_excel("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Data/MX_output_gap_proxy_Industrial_Activity.xlsx")
+OutputGapMX <- as.numeric(OutputGapMX$`HP Cycle`[97:325])
+
+infMX <- read_excel("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Data/MX_inf.xlsx")
+infMX <- as.numeric(infMX$...3[393:621]) 
+
+intrateMX <- read_excel("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Data/MX_interest_rate.xlsx")
+intrateMX <- as.numeric(intrateMX$...3[174:402])/100 #TIIE 28
+
+M2MX <- read_excel("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Data/MX_M2.xlsx")
+M2MX <- as.numeric(M2MX$...15[19:247])
+
+urateMX <- read_excel("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Data/MX_u_rate.xlsx")
+urateMX <- as.numeric(urateMX$`x/100`[49:277])
+
+RERMX <- read_excel("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Data/MX_RER.xlsx")
+RERMX <- as.numeric(RERMX$...3[150:378])
+
+realWMX <- read_excel("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Data/MX_r_wages.xlsx")
+realWMX <- as.numeric(realWMX$...5[86:314])
+
+
+nmonthsMX = 229
+mdateMX <- seq(as.Date("2001-1-1"), by = "month", length.out = nmonthsMX)
+
+dataMX <- data.frame(mdateMX, infMX, intrateMX, M2MX, OutputGapMX, urateMX, RERMX, realWMX, row.names = NULL) 
+```
+```{r EA data divided}
+train_mx <- dataMX[1:217,]
+test_mx <- dataMX[218:229,]
+
+```
+And data viasualization.
+
+```{r data for the MX, echo=FALSE}
+pmx1colours <- c("Inflation" = "darkred", "Interest Rate" = "steelblue")
+pmx1 <- ggplot(data = dataMX, aes(x = mdateMX)) + 
+  geom_line(aes(y = infMX, color = "Inflation")) +
+  geom_line(aes(y = intrateMX, color = "Interest Rate")) +
+    labs(x = "", y = "", color = "Legend", title = "Inflation and Interest Rate (MX)") +
+  scale_color_manual(values = pmx1colours)
+ 
+pmx2colours <- c("Inflation" = "darkred", "M2" = "steelblue")
+pmx2 <- ggplot(data = dataMX, aes(x = mdateMX)) + 
+  geom_line(aes(y = infMX, color = "Inflation")) +
+  geom_line(aes(y = M2MX, color = "M2")) +
+  labs(x = "", y = "", color = "Legend", title = "Inflation and M2 Money Supply (MX)") +
+  scale_color_manual(values = pmx2colours)
+
+pmx3colours <- c("Inflation" = "darkred", "Output Gap" = "steelblue")
+pmx3 <- ggplot(data = dataMX, aes(x = mdateMX)) + 
+  geom_line(aes(y = infMX, color = "Inflation")) +
+  geom_line(aes(y = OutputGapMX, color = "Output Gap")) +
+  labs(x = "", y = "", color = "Legend", title = "Inflation and Output Gap (MX)") +
+  scale_color_manual(values = pmx3colours)
+
+pmx4colours <- c("Inflation" = "darkred", "Unemployment Rate" = "steelblue")
+pmx4 <- ggplot(data = dataMX, aes(x = mdateMX)) + 
+  geom_line(aes(y = infMX, color = "Inflation")) +
+  geom_line(aes(y = urateMX, color = "Unemployment Rate")) +
+  labs(x = "", y = "", color = "Legend", title = "Inflation and Unemployment Rate (MX)") +
+  scale_color_manual(values = pmx4colours)
+
+pmx5colours <- c("Inflation" = "darkred", "Real Exchange Rate" = "steelblue")
+pmx5 <- ggplot(data = dataMX, aes(x = mdateMX)) + 
+  geom_line(aes(y = infMX, color = "Inflation")) +
+  geom_line(aes(y = RERMX, color = "Real Exchange Rate")) +
+  labs(x = "", y = "", color = "Legend", title = "Inflation and Real Exchange Rate (MX)") +
+  scale_color_manual(values = pmx5colours)
+
+pmx6colours <- c("Inflation" = "darkred", "Real Wages" = "steelblue")
+pmx6 <- ggplot(data = dataMX, aes(x = mdateMX)) + 
+  geom_line(aes(y = infMX, color = "Inflation")) +
+  geom_line(aes(y = realWMX, color = "Real Wages")) +
+  labs(x = "", y = "", color = "Legend", title = "Inflation and Real Wages (MX)") +
+  scale_color_manual(values = pmx6colours)
+
+pmx1
+pmx2
+pmx3
+pmx4
+pmx5
+pmx6
+```

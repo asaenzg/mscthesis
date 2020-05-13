@@ -22,7 +22,7 @@ Here I present a restricted VAR model for each economy. The model takes into acc
 
 ##VAR for the US
 
-The first step is to choose an appropriate number of lags for the model. Since Ventzislav and Lutz (2005) sugests that Akakike's Information Criterion (AIC) tends to produce the most accurate structural and semi-structural impulse response, I will be using this criterion.
+The first step is to choose an appropriate number of lags for the model. Since Ivanov and Kilian (2005) find that Akaike's Information Criterion (AIC) tends to produce the most accurate structural and semi-structural impulse response, I will be using this criterion.
 
 ```{r VAR US}
 predictors <- length(dataUS)

@@ -1,0 +1,222 @@
+---
+title: 'NN: nnetar'
+author: "Andres A Saenz Guzman"
+date: "13/5/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r libraries , results='hide'}
+library(ggplot2)
+library(tidyverse)
+library(stargazer)
+library(forecast)
+```
+
+In this section I use the nnetar() automatic NN from the forecast package. The network consist on a univariate perceptron, a type of feedforward NN with a single hidden layer. Although the description mentions that this is for univariate times series, there is an option for external regressors.
+
+##NNETAR for the US
+
+```{r nnetar US}
+train.nnetar <- train_us[, 2] #Inflation is in column 2
+test.nnetar <- test_us[, 2]
+lags <- 12
+neurons <- 6 #Number of nodes in the hidden layer
+sims <- 400
+L <- length(dataUS)
+N <- nrow(train_us)
+predictors <- train_us[, 3:L]
+fcast.inputs <- train_us[(N-lags+1):N,3:L]
+
+
+m.nnetar <- nnetar(y = train.nnetar, 
+                    p = lags, 
+                    size = neurons,
+                    repeats = sims,
+                    xreg = predictors
+                    )
+
+ 
+fcast.nnetar <- forecast(m.nnetar, 
+                  h = 12, 
+                  PI = TRUE, 
+                  level = c(80,95), 
+                  fan = TRUE,
+                  xreg = fcast.inputs,
+                  npaths = 40
+                  )
+         
+autoplot(fcast.nnetar, ylab = "Inflation")    
+
+error.nnetar.us <- fcast.nnetar$mean - test_us[, 2]
+autoplot(error.nnetar.us)
+```
+
+##NNETAR for the EA
+
+```{r nnetar EA}
+train.nnetar <- train_ea[, 2] #Inflation is in column 2
+test.nnetar <- test_ea[, 2]
+lags <- 12
+neurons <- 6 #Number of nodes in the hidden layer
+sims <- 400
+L <- length(dataEA)
+N <- nrow(train_ea)
+predictors <- train_ea[, 3:L]
+fcast.inputs <- train_ea[(N-lags+1):N,3:L]
+
+
+m.nnetar <- nnetar(y = train.nnetar, 
+                    p = lags, 
+                    size = neurons,
+                    repeats = sims,
+                    xreg = predictors
+                    )
+
+ 
+fcast.nnetar <- forecast(m.nnetar, 
+                  h = 12, 
+                  PI = TRUE, 
+                  level = c(80,95), 
+                  fan = TRUE,
+                  xreg = fcast.inputs,
+                  npaths = 40
+                  )
+         
+autoplot(fcast.nnetar, ylab = "Inflation")    
+
+error.nnetar.ea <- fcast.nnetar$mean - test_ea[, 2]
+autoplot(error.nnetar.ea)
+```
+
+##NNETAR for the NL
+
+```{r nnetar NL}
+train.nnetar <- train_nl[, 2] #Inflation is in column 2
+test.nnetar <- test_nl[, 2]
+lags <- 12
+neurons <- 6 #Number of nodes in the hidden layer
+sims <- 400
+L <- length(dataNL)
+N <- nrow(train_nl)
+predictors <- train_nl[, 3:L]
+fcast.inputs <- train_nl[(N-lags+1):N,3:L]
+
+
+m.nnetar <- nnetar(y = train.nnetar, 
+                    p = lags, 
+                    size = neurons,
+                    repeats = sims,
+                    xreg = predictors
+                    )
+
+ 
+fcast.nnetar <- forecast(m.nnetar, 
+                  h = 12, 
+                  PI = TRUE, 
+                  level = c(80,95), 
+                  fan = TRUE,
+                  xreg = fcast.inputs,
+                  npaths = 40
+                  )
+         
+autoplot(fcast.nnetar, ylab = "Inflation")    
+
+error.nnetar.nl <- fcast.nnetar$mean - test_nl[, 2]
+autoplot(error.nnetar.nl)
+```
+
+##NNETAR for CL
+
+```{r nnetar CL}
+train.nnetar <- train_cl[, 2] #Inflation is in column 2
+test.nnetar <- test_cl[, 2]
+lags <- 12
+neurons <- 6 #Number of nodes in the hidden layer
+sims <- 400
+L <- length(dataCL)
+N <- nrow(train_cl)
+predictors <- train_cl[, 3:L]
+fcast.inputs <- train_cl[(N-lags+1):N,3:L]
+
+
+m.nnetar <- nnetar(y = train.nnetar, 
+                    p = lags, 
+                    size = neurons,
+                    repeats = sims,
+                    xreg = predictors
+                    )
+
+ 
+fcast.nnetar <- forecast(m.nnetar, 
+                  h = 12, 
+                  PI = TRUE, 
+                  level = c(80,95), 
+                  fan = TRUE,
+                  xreg = fcast.inputs,
+                  npaths = 40
+                  )
+         
+autoplot(fcast.nnetar, ylab = "Inflation")    
+
+error.nnetar.cl <- fcast.nnetar$mean - test_cl[, 2]
+autoplot(error.nnetar.cl)
+```
+
+##NNETAR for MX
+
+```{r nnetar MX}
+train.nnetar <- train_mx[, 2] #Inflation is in column 2
+test.nnetar <- test_mx[, 2]
+lags <- 12
+neurons <- 6 #Number of nodes in the hidden layer
+sims <- 400
+L <- length(dataMX)
+N <- nrow(train_mx)
+predictors <- train_mx[, 3:L]
+fcast.inputs <- train_mx[(N-lags+1):N,3:L]
+
+
+m.nnetar <- nnetar(y = train.nnetar, 
+                    p = lags, 
+                    size = neurons,
+                    repeats = sims,
+                    xreg = predictors
+                    )
+
+ 
+fcast.nnetar <- forecast(m.nnetar, 
+                  h = 12, 
+                  PI = TRUE, 
+                  level = c(80,95), 
+                  fan = TRUE,
+                  xreg = fcast.inputs,
+                  npaths = 40
+                  )
+         
+autoplot(fcast.nnetar, ylab = "Inflation")    
+
+error.nnetar.mx <- fcast.nnetar$mean - test_mx[, 2]
+autoplot(error.nnetar.mx)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,256 @@
+---
+title: "Model Comparison"
+author: "Andres A Saenz Guzman"
+date: "13/5/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Here I compare the forecast accuracy of each model across the five countries in the sample, the US, the EA, the NL, CL and MX. In order to do so I compute the following four metrics: 
+
+(i) Absolute difference in forecast error (AD). Here I take the absolute value of the forecast errors in two models and substract them in order to obtain values and compare them. 
+
+$AD_t = |F_t^i| - |F_t^{-1}|$,
+
+Where $AD$ is the absolute difference, $F_t^i$ is the forecast error in time period $t$ of model $i$ and $F_t^{-i}$ the forecast error in forecast time period $t$ of model $-i$. Note that, if $AD_t > 0$, then model $-i$ is more accurate than model $i$. Finally, in order to see the overall accuracy, the differences are shown in a histogram, this if values are leaning towards positive values, then model $i$ is worse than $-i$.
+
+(ii) Average error. An arithmetic mean of forecast errors.
+
+(ii) Present bias average (PBA). Here I penalize the weight of future forecast errors in the average. The idea is that central banks may be more interested in the prediction accuracy of short term inflation. I compute the average as shown below:
+
+$PBA^i = \frac{\sum_{t=1}^T (1 - \frac{t - 1}{T}) |F_t^i|}{T}$,
+
+Where $PBA^i$ is the present bias average of model $i$, $t$ is the number of time periods in the future, $T$ is the number of periods in the forecast and $F_t^i$ is the forecast error in $t$ of model $i$.
+
+(iii) Present punishing average (PPA). In this average, I do the opposite of the PBA. I penalize short term errors in order to measure the accuracy of longer term forecasts.
+
+$PPA^i =  \frac{\sum_{t=1}^T (1 - \frac{T - t}{T}) |F_t^i|}{T}$,
+
+Where $PPA^i$ is the present punishing average of model $i$, $t$ is the number of time periods in the future, $T$ is the number of periods in the forecast and $F_t^i$ is the forecast error in $t$ of model $i$.
+
+In order to use PBA and PPA, I create a weights array.
+
+```{r}
+Te <- length(error.benchmark.us) #since all forecasts are the same length, it does not matter which one I choose 
+t <- 1:Te 
+
+w.PBA <- 1 - (t - 1)/Te
+
+w.PPA <- 1 - (Te - t)/Te
+```
+
+
+##Comparing models in the US
+```{r US model comparison}
+AD.benchmark.var <- abs(error.benchmark.us) - abs(error.var.us)
+AD.benchmark.nnetar <- abs(error.benchmark.us) - abs(error.nnetar.us)
+AD.var.nnetar <- abs(error.var.us) - abs(error.nnetar.us)
+
+
+ggplot(as.data.frame(AD.benchmark.var), aes(AD.benchmark.var)) + geom_histogram()
+ggplot(as.data.frame(AD.benchmark.nnetar), aes(AD.benchmark.nnetar)) + geom_histogram()
+ggplot(as.data.frame(AD.var.nnetar), aes(AD.var.nnetar)) + geom_histogram()
+```
+
+```{r US model comparison}
+AVG.benchmark <- mean(abs(error.benchmark.us))
+PBA.benchmark <- weighted.mean(abs(error.benchmark.us), w.PBA)
+PPA.benchmark <- weighted.mean(abs(error.benchmark.us), w.PPA)
+
+AVG.var <- mean(abs(error.var.us))
+PBA.var <- weighted.mean(abs(error.var.us), w.PBA)
+PPA.var<- weighted.mean(abs(error.var.us), w.PPA)
+
+AVG.nnetar <- mean(abs(error.nnetar.us))
+PBA.nnetar <- weighted.mean(abs(error.nnetar.us), w.PBA)
+PPA.nnetar <- weighted.mean(abs(error.nnetar.us), w.PPA)
+
+
+
+AVG.benchmark
+PBA.benchmark
+PPA.benchmark
+
+AVG.var
+PBA.var
+PPA.var
+
+AVG.nnetar
+PBA.nnetar
+PPA.nnetar
+```
+
+
+##Comparing models in the EA
+
+```{r EA model comparison}
+AD.benchmark.var <- abs(error.benchmark.ea) - abs(error.var.ea)
+AD.benchmark.nnetar <- abs(error.benchmark.ea) - abs(error.nnetar.ea)
+AD.var.nnetar <- abs(error.var.ea) - abs(error.nnetar.ea)
+
+
+ggplot(as.data.frame(AD.benchmark.var), aes(AD.benchmark.var)) + geom_histogram()
+ggplot(as.data.frame(AD.benchmark.nnetar), aes(AD.benchmark.nnetar)) + geom_histogram()
+ggplot(as.data.frame(AD.var.nnetar), aes(AD.var.nnetar)) + geom_histogram()
+```
+
+
+```{r EA model comparison}
+AVG.benchmark <- mean(abs(error.benchmark.ea))
+PBA.benchmark <- weighted.mean(abs(error.benchmark.ea), w.PBA)
+PPA.benchmark <- weighted.mean(abs(error.benchmark.ea), w.PPA)
+
+AVG.var <- mean(abs(error.var.ea))
+PBA.var <- weighted.mean(abs(error.var.ea), w.PBA)
+PPA.var<- weighted.mean(abs(error.var.ea), w.PPA)
+
+AVG.nnetar <- mean(abs(error.nnetar.ea))
+PBA.nnetar <- weighted.mean(abs(error.nnetar.ea), w.PBA)
+PPA.nnetar <- weighted.mean(abs(error.nnetar.ea), w.PPA)
+
+
+
+AVG.benchmark
+PBA.benchmark
+PPA.benchmark
+
+AVG.var
+PBA.var
+PPA.var
+
+AVG.nnetar
+PBA.nnetar
+PPA.nnetar
+```
+
+
+##Comparing models in the NL
+
+```{r NL model comparison}
+AD.benchmark.var <- abs(error.benchmark.nl) - abs(error.var.nl)
+AD.benchmark.nnetar <- abs(error.benchmark.nl) - abs(error.nnetar.nl)
+AD.var.nnetar <- abs(error.var.nl) - abs(error.nnetar.nl)
+
+
+ggplot(as.data.frame(AD.benchmark.var), aes(AD.benchmark.var)) + geom_histogram()
+ggplot(as.data.frame(AD.benchmark.nnetar), aes(AD.benchmark.nnetar)) + geom_histogram()
+ggplot(as.data.frame(AD.var.nnetar), aes(AD.var.nnetar)) + geom_histogram()
+```
+
+
+```{r NL model comparison}
+AVG.benchmark <- mean(abs(error.benchmark.nl))
+PBA.benchmark <- weighted.mean(abs(error.benchmark.nl), w.PBA)
+PPA.benchmark <- weighted.mean(abs(error.benchmark.nl), w.PPA)
+
+AVG.var <- mean(abs(error.var.nl))
+PBA.var <- weighted.mean(abs(error.var.nl), w.PBA)
+PPA.var<- weighted.mean(abs(error.var.nl), w.PPA)
+
+AVG.nnetar <- mean(abs(error.nnetar.nl))
+PBA.nnetar <- weighted.mean(abs(error.nnetar.nl), w.PBA)
+PPA.nnetar <- weighted.mean(abs(error.nnetar.nl), w.PPA)
+
+
+
+AVG.benchmark
+PBA.benchmark
+PPA.benchmark
+
+AVG.var
+PBA.var
+PPA.var
+
+AVG.nnetar
+PBA.nnetar
+PPA.nnetar
+```
+
+
+##Comparing models in the CL
+
+```{r CL model comparison}
+AD.benchmark.var <- abs(error.benchmark.cl) - abs(error.var.cl)
+AD.benchmark.nnetar <- abs(error.benchmark.cl) - abs(error.nnetar.cl)
+AD.var.nnetar <- abs(error.var.cl) - abs(error.nnetar.cl)
+
+
+ggplot(as.data.frame(AD.benchmark.var), aes(AD.benchmark.var)) + geom_histogram()
+ggplot(as.data.frame(AD.benchmark.nnetar), aes(AD.benchmark.nnetar)) + geom_histogram()
+ggplot(as.data.frame(AD.var.nnetar), aes(AD.var.nnetar)) + geom_histogram()
+```
+
+
+```{r CL model comparison}
+AVG.benchmark <- mean(abs(error.benchmark.cl))
+PBA.benchmark <- weighted.mean(abs(error.benchmark.cl), w.PBA)
+PPA.benchmark <- weighted.mean(abs(error.benchmark.cl), w.PPA)
+
+AVG.var <- mean(abs(error.var.cl))
+PBA.var <- weighted.mean(abs(error.var.cl), w.PBA)
+PPA.var<- weighted.mean(abs(error.var.cl), w.PPA)
+
+AVG.nnetar <- mean(abs(error.nnetar.cl))
+PBA.nnetar <- weighted.mean(abs(error.nnetar.cl), w.PBA)
+PPA.nnetar <- weighted.mean(abs(error.nnetar.cl), w.PPA)
+
+
+
+AVG.benchmark
+PBA.benchmark
+PPA.benchmark
+
+AVG.var
+PBA.var
+PPA.var
+
+AVG.nnetar
+PBA.nnetar
+PPA.nnetar
+```
+
+
+##Comparing models in the MX
+
+```{r MX model comparison}
+AD.benchmark.var <- abs(error.benchmark.mx) - abs(error.var.mx)
+AD.benchmark.nnetar <- abs(error.benchmark.mx) - abs(error.nnetar.mx)
+AD.var.nnetar <- abs(error.var.mx) - abs(error.nnetar.mx)
+
+
+ggplot(as.data.frame(AD.benchmark.var), aes(AD.benchmark.var)) + geom_histogram()
+ggplot(as.data.frame(AD.benchmark.nnetar), aes(AD.benchmark.nnetar)) + geom_histogram()
+ggplot(as.data.frame(AD.var.nnetar), aes(AD.var.nnetar)) + geom_histogram()
+```
+
+
+```{r MX model comparison}
+AVG.benchmark <- mean(abs(error.benchmark.mx))
+PBA.benchmark <- weighted.mean(abs(error.benchmark.mx), w.PBA)
+PPA.benchmark <- weighted.mean(abs(error.benchmark.mx), w.PPA)
+
+AVG.var <- mean(abs(error.var.mx))
+PBA.var <- weighted.mean(abs(error.var.mx), w.PBA)
+PPA.var<- weighted.mean(abs(error.var.mx), w.PPA)
+
+AVG.nnetar <- mean(abs(error.nnetar.mx))
+PBA.nnetar <- weighted.mean(abs(error.nnetar.mx), w.PBA)
+PPA.nnetar <- weighted.mean(abs(error.nnetar.mx), w.PPA)
+
+
+
+AVG.benchmark
+PBA.benchmark
+PPA.benchmark
+
+AVG.var
+PBA.var
+PPA.var
+
+AVG.nnetar
+PBA.nnetar
+PPA.nnetar
+```

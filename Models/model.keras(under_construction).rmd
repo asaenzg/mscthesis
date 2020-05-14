@@ -1,0 +1,168 @@
+---
+title: 'NN: keras'
+author: "Andres A Saenz Guzman"
+date: "14/5/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries, results='hide'}
+library(ggplot2)
+library(tidyverse)
+library(tensorflow)
+library(keras)
+library(forecast)
+library(caret)
+library(plyr)
+library(dplyr)
+library(reticulate)
+
+```
+
+
+In this file I use the keras package to forecast inflation uising a multivariate recurrent neural network (RNN). RNNs take output and put it back as input, implying an information flow in two directions as opposed to feed-forward neural networks (FNN).
+
+Before I begin, I declare a general function to separate data into training, validation and test sets. Then I establish some common parameters across countries. Note that, in this particular case, there is no need to change 'na' in the data sets, since there are no missing values.
+
+```{r data generator function}
+generator <- function(data, lookback, delay, min_index, max_index, shuffle=FALSE, batch_size=20, step=1, predseries){
+  if(is.null(max_index)) max_index <- nrow(data) - delay - 1
+  i <- min_index + lookback
+  function(){
+    if (shuffle){
+      rows <- sample(c((min_index + lookback):max_index), size = batch_size)
+    } else {
+      if (i + batch_size >= max_index)
+        i <<- min_index + lookback
+      rows <- c(i:min(i + batch_size, max_index))
+      i <<- i +length(rows)
+    }
+    samples <- array(0, dim = c(length(rows), lookback/step, dim(data)[[-1]]))
+    targets <- array(0, dim = c(length(rows)))
+    for (j in 1:length(rows)){
+      indices <- seq(rows[[j]] - lookback, rows[[j]], 
+                     length.out = dim(samples)[[2]])
+      samples[j, , ] <- data[indices, ]
+      targets[[j]] <- data[rows[[j]] + delay, predseries]
+    }
+    list(samples, targets)
+  }
+}
+```
+
+```{r general parameters}
+lookback = 12*1 #A year of past data is feed into the NN.
+step <- 1 #Observations occur every month (don't skip any observation).
+delay <- 12 #Months to predict.
+batch_size <- 10
+predser <- 1 #Target variable in the list. Inflation is going to be te first listed variable.
+
+```
+
+
+## Keras for the US
+
+The first step is to divide data using the generator function. I split training data in 70% actual training and 30% validation.
+
+```{r US split data}
+L <- length(dataUS)
+my.nn.data <- as.matrix(dataUS[, 2:L]) #First column are dates. Data must be numeric.
+N <- as.numeric(nrow(train_us))
+max.index.train <- round(N*0.7, digits = 0)
+min.index.val <- max.index.train + 1
+max.index.val <- N
+min.index.test <- N + 1
+
+#training set: 
+train_gen <- generator(
+  my.nn.data,
+  lookback = lookback,
+  delay = delay,
+  min_index = 1,
+  max_index = max.index.train,
+  shuffle = TRUE,
+  step = step,
+  batch_size = batch_size,
+  predseries = predser
+)
+
+#validation set:
+val_gen <- generator(
+  my.nn.data,
+  lookback = lookback,
+  delay = delay,
+  min_index = min.index.val,
+  max_index = max.index.val,
+  step = step,
+  batch_size = batch_size,
+  predseries = predser
+)
+
+#test set:
+test_gen <- generator(
+  my.nn.data,
+  lookback = lookback,
+  delay = delay,
+  min_index = min.index.test,
+  max_index = NULL,
+  step = step,
+  batch_size = batch_size,
+  predseries = predser
+)
+
+val_steps <- (max.index.val - max.index.train - lookback) / batch_size
+test_steps <- (nrow(my.nn.data) - min.index.test - lookback) / batch_size
+```
+
+After splitting the data, I declare the model using the 'keras' package. I use the hyperbolic tangent activation function in order to ensure that output is between -1 an 1. Since Šestanović (2019) find that three and four layers RNN produce better output. I will use three hidden layers in the network's structure.
+
+```{r US build model}
+#model structure:
+initial.units <- 32
+m.keras <- keras_model_sequential() %>% 
+  layer_gru(units = initial.units, 
+            dropout = 0.4, 
+            recurrent_dropout = 0.4, 
+            input_shape = list(NULL, dim(my.nn.data)[[-1]])) %>% 
+  layer_dense(units = initial.units/2) %>% 
+  layer_dense(units = initial.units/4)
+  layer_dense(units = 1, activation = 'tanh')
+
+#compile model:
+m.keras %>% compile(
+  optimizer = 'rmsprop',
+  loss = 'mse'
+)
+
+#Overfitting test
+m.keras.history <- m.keras %>% fit_generator(
+  train_gen,
+  steps_per_epoch = 50,
+  epochs = 30,
+  validation_data = val_gen,
+  validation_steps = val_steps
+)
+
+#save the model:
+m.keras %>% save_model_hdf5("rectimeseries.h5")
+
+#The trained model:
+m.keras
+
+#Check for overfitting:
+m.keras.history
+plot(m.keras.history)
+```
+
+There seems to be no mayor overfitting problems. Therefore, the next step is to produce a 12 months forecast.
+
+```{r US inflation forecast}
+fcast.keras.us <- m.keras %>%  predict_generator(test_gen, steps = test_steps, max_queue_size = 12)
+fcast.keras.us
+autoplot(fcast.keras.us)
+
+```
+

@@ -57,7 +57,7 @@ test_us <- dataUS[290:301,]
 
 ```
 
-Bellow is the data visualization for the US.
+Below is the data visualization for the US.
 
 ```{r US data visualization, echo='FALSE'}
 

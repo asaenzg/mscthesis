@@ -13,4 +13,6 @@ The models used in the project are listed below:
     3. "Automatic" NN with nnetar: A multivariate perceptron. 
     4. "Manual" NN with keras: A multivariate RNN with a GRU hidden layer.
 
+Please, run first the 'data_presentation' file in order to load the data.
+
 At the moment, the NN with keras is still under construction.

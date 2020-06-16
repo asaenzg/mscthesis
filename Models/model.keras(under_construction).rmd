@@ -74,7 +74,7 @@ N <- as.numeric(nrow(train_us))
 max.index.train <- round(N*0.7, digits = 0)
 min.index.val <- max.index.train + 1
 max.index.val <- N
-min.index.test <- N + 1
+min.index.test <- N - 12
 
 #training set: 
 train_gen <- generator(
@@ -83,7 +83,7 @@ train_gen <- generator(
   delay = delay,
   min_index = 1,
   max_index = max.index.train,
-  shuffle = TRUE,
+  shuffle = FALSE,
   step = step,
   batch_size = batch_size,
   predseries = predser
@@ -160,9 +160,26 @@ plot(m.keras.history)
 There seems to be no mayor overfitting problems. Therefore, the next step is to produce a 12 months forecast.
 
 ```{r US inflation forecast}
-fcast.keras.us <- m.keras %>%  predict_generator(test_gen, steps = test_steps, max_queue_size = 12)
+test_gen <- generator(
+  my.nn.data,
+  lookback = lookback,
+  delay = delay,
+  min_index = min.index.test,
+  max_index = NULL,
+  step = step,
+  batch_size = batch_size,
+  predseries = predser
+)
+
+test_gen_data <- test_gen()
+
+
+fcast.keras.us <- m.keras %>%  predict(test_gen_data, 
+                                       batch_size = batch_size, 
+                                       steps = test_steps)
+                                                 
 fcast.keras.us
-autoplot(fcast.keras.us)
 
 ```
+
 

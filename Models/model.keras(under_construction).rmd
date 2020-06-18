@@ -128,12 +128,12 @@ m.keras <- keras_model_sequential() %>%
             recurrent_dropout = 0.4, 
             input_shape = list(NULL, dim(my.nn.data)[[-1]])) %>% 
   layer_dense(units = initial.units/2) %>% 
-  layer_dense(units = initial.units/4)
+  layer_dense(units = initial.units/4) %>% 
   layer_dense(units = 1, activation = 'tanh')
 
 #compile model:
 m.keras %>% compile(
-  optimizer = 'rmsprop',
+  optimizer = optimizer_rmsprop(lr = 0.01),
   loss = 'mse'
 )
 
@@ -182,4 +182,7 @@ fcast.keras.us
 
 ```
 
+```{r}
+plot(fcast.keras.us[,1])
+```
 

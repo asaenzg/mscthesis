@@ -1,0 +1,547 @@
+---
+title: "Model Comparison"
+author: "Andres A Saenz Guzman"
+date: "13/5/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, results='hide'}
+library(multDM) #Diebold-Mariano test
+library(readxl)
+library(forecast)
+```
+
+
+Here I compare the forecast accuracy of each model across the five countries in the sample, the US, the EA, the NL, CL and MX. In order to do so I compute the following four metrics: 
+
+(i) Diebold-Mariano test (DM). This test compares predictive accuracy between two models. To do so, it compares the absolute value of the individual forecast errors in two models and substract them in order to obtain values and compare them.
+
+$DM_t = |F_t^i| - |F_t^{-i}|$,
+
+Where $DM$ is the absolute difference, $F_t^i$ is the forecast error in time period $t$ of model $i$ and $F_t^{-i}$ the forecast error in forecast time period $t$ of model $-i$. Note that, if $DM_t > 0$, then model $-i$ is more accurate than model $i$. Finally, if values are leaning towards positive values, then model $i$ is worse than $-i$.
+
+(ii) Average error. An arithmetic mean of forecast errors.
+
+(ii) Present bias average (PBA). Here I penalize the weight of future forecast errors in the average. The idea is that central banks may be more interested in the prediction accuracy of short term inflation. I compute the average as shown below:
+
+$PBA^i = \frac{\sum_{t=1}^T (1 - \frac{t - 1}{T}) |F_t^i|}{T}$,
+
+Where $PBA^i$ is the present bias average of model $i$, $t$ is the number of time periods in the future, $T$ is the number of periods in the forecast and $F_t^i$ is the forecast error in $t$ of model $i$.
+
+(iii) Present punishing average (PPA). In this average, I do the opposite of the PBA. I penalize short term errors in order to measure the accuracy of longer term forecasts.
+
+$PPA^i =  \frac{\sum_{t=1}^T (1 - \frac{T - t}{T}) |F_t^i|}{T}$,
+
+Where $PPA^i$ is the present punishing average of model $i$, $t$ is the number of time periods in the future, $T$ is the number of periods in the forecast and $F_t^i$ is the forecast error in $t$ of model $i$.
+
+In order to use PBA and PPA, I create a weights array.
+
+```{r}
+Te <- length(error.benchmark.us) #since all forecasts are the same length, it does not matter which one I choose 
+t <- 1:Te 
+
+w.PBA <- 1 - (t - 1)/Te
+
+w.PPA <- 1 - (Te - t)/Te
+```
+
+Now, since we build the keras neural network in python, we must explicitly load the results.
+
+```{r, results='hide'}
+#forecasts
+keras.forecast.us <- read_csv("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Python_Files/nn_keras_predicted_us.csv")
+keras.forecast.ea <- read_csv("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Python_Files/nn_keras_predicted_ea.csv")
+keras.forecast.nl <- read_csv("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Python_Files/nn_keras_predicted_nl.csv")
+keras.forecast.cl <- read_csv("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Python_Files/nn_keras_predicted_cl.csv")
+keras.forecast.mx <- read_csv("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Python_Files/nn_keras_predicted_mx.csv")
+
+#forecast error
+keras.error.us <- read_csv("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Python_Files/nn_keras_error_us.csv")
+keras.error.ea <- read_csv("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Python_Files/nn_keras_error_ea.csv")
+keras.error.nl <- read_csv("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Python_Files/nn_keras_error_nl.csv")
+keras.error.cl <- read_csv("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Python_Files/nn_keras_error_cl.csv")
+keras.error.mx <- read_csv("C:/Users/aasg/OneDrive/Escritorio/Tilburg University/Thesis/Python_Files/nn_keras_error_mx.csv")
+```
+
+Now, in order to compare these models, we must convert the outputs into time series and define the inflation testing sample.
+
+```{r}
+#observed
+test.inf.us <- as.ts(dataUS[nrow(dataUS)-12:nrow(dataUS), 2]) #inflation is the second column
+test.inf.ea <- as.ts(dataEA[nrow(dataEA)-12:nrow(dataEA), 2])
+test.inf.nl <- as.ts(dataNL[nrow(dataNL)-12:nrow(dataNL), 2])
+test.inf.cl <- as.ts(dataCL[nrow(dataCL)-12:nrow(dataCL), 2])
+test.inf.mx <- as.ts(dataMX[nrow(dataMX)-12:nrow(dataMX), 2])
+
+#keras
+keras.pred.us <- as.ts(keras.forecast.us[,2], start = 1, end = 12, frequency = 1)
+keras.pred.ea <- as.ts(keras.forecast.ea[,2], start = 1, end = 12, frequency = 1)
+keras.pred.nl <- as.ts(keras.forecast.nl[,2], start = 1, end = 12, frequency = 1)
+keras.pred.cl <- as.ts(keras.forecast.cl[,2], start = 1, end = 12, frequency = 1)
+keras.pred.mx <- as.ts(keras.forecast.mx[,2], start = 1, end = 12, frequency = 1)
+
+keras.error.us <- as.ts(keras.error.us[,2], start = 1, end = 12, frequency = 1)
+keras.error.ea <- as.ts(keras.error.ea[,2], start = 1, end = 12, frequency = 1)
+keras.error.nl <- as.ts(keras.error.nl[,2], start = 1, end = 12, frequency = 1)
+keras.error.cl <- as.ts(keras.error.cl[,2], start = 1, end = 12, frequency = 1)
+keras.error.mx <- as.ts(keras.error.mx[,2], start = 1, end = 12, frequency = 1)
+
+#benchmark
+pred.benchmark.us <- as.ts(as.data.frame(pred.benchmark.us, row.names = c(1:12))) 
+pred.benchmark.ea <- as.ts(as.data.frame(pred.benchmark.ea, row.names = c(1:12))) 
+pred.benchmark.nl <- as.ts(as.data.frame(pred.benchmark.nl, row.names = c(1:12))) 
+pred.benchmark.cl <- as.ts(as.data.frame(pred.benchmark.cl, row.names = c(1:12))) 
+pred.benchmark.mx <- as.ts(as.data.frame(pred.benchmark.mx, row.names = c(1:12))) 
+
+error.benchmark.us <- as.ts(as.data.frame(error.benchmark.us, row.names = c(1:12)))
+error.benchmark.ea <- as.ts(as.data.frame(error.benchmark.ea, row.names = c(1:12))) 
+error.benchmark.nl <- as.ts(as.data.frame(error.benchmark.nl, row.names = c(1:12))) 
+error.benchmark.cl <- as.ts(as.data.frame(error.benchmark.cl, row.names = c(1:12))) 
+error.benchmark.mx <- as.ts(as.data.frame(error.benchmark.mx, row.names = c(1:12))) 
+
+#var
+pred.var.us <- as.ts(as.data.frame(pred.var.us, row.names = c(1:12))) 
+pred.var.ea <- as.ts(as.data.frame(pred.var.ea, row.names = c(1:12))) 
+pred.var.nl <- as.ts(as.data.frame(pred.var.nl, row.names = c(1:12))) 
+pred.var.cl <- as.ts(as.data.frame(pred.var.cl, row.names = c(1:12))) 
+pred.var.mx <- as.ts(as.data.frame(pred.var.mx, row.names = c(1:12))) 
+
+error.var.us <- as.ts(as.data.frame(error.var.us, row.names = c(1:12)))
+error.var.ea <- as.ts(as.data.frame(error.var.ea, row.names = c(1:12))) 
+error.var.nl <- as.ts(as.data.frame(error.var.nl, row.names = c(1:12))) 
+error.var.cl <- as.ts(as.data.frame(error.var.cl, row.names = c(1:12))) 
+error.var.mx <- as.ts(as.data.frame(error.var.mx, row.names = c(1:12))) 
+```
+
+
+## 1. Diebold-Mariano Test
+
+The the null hypothesis and states that both models have the same accuracy. There are three possible alternative hypothesis:
+  1. Two Sided: This is the opposite of null hypothesis and states that both models have different accuracy
+  2. Less: The second alternative is model 2 being less accurate than model 1
+  3. Greater: The last alternative is model 2 being more accurate than model 1
+
+
+
+#1.1. US
+
+```{r}
+DM.benchmark.var.test <- DM.test(pred.benchmark.us, #forecast from model1
+                                 pred.var.us, #forecast from model2
+                                 test.inf.us, #observed values
+                                 loss.type = 'AE', #absolute error
+                                 h = 8,
+                                 c = TRUE, #Harvey-Leybourn-Newbold correction for small samples
+                                 H1 =  "same") #alternative hypothesis
+
+DM.benchmark.keras.test <- DM.test(pred.benchmark.us, 
+                                   keras.pred.us, 
+                                   test.inf.us, #observed values
+                                   loss.type = 'AE', #absolute error
+                                   h = 8,
+                                   c = TRUE, #Harvey-Leybourn-Newbold correction for small samples
+                                   H1 =  "same") #alternative hypothesis
+
+DM.var.keras.test <- DM.test(pred.var.us, 
+                             keras.pred.us,
+                             test.inf.us, #observed values
+                             loss.type = 'AE', #asolute error
+                             h = 8,
+                             c = TRUE, #Harvey-Leybourn-Newbold correction for small samples
+                             H1 =  "same") #alternative hypothesis
+
+DM.benchmark.var.test
+DM.benchmark.keras.test
+DM.var.keras.test
+```
+
+We start by setting all H1 to "same". This yields that all models are equally accurate for forecasting inflation in the US.
+
+# 1.2. EA
+```{r}
+DM.benchmark.var.test <- DM.test(pred.benchmark.ea, #forecast from model1
+                                 pred.var.ea, #forecast from model2
+                                 test.inf.ea, #observed values
+                                 loss.type = 'AE', #absolute error
+                                 h = 6,
+                                 c = TRUE, #Harvey-Leybourn-Newbold correction for small samples
+                                 H1 =  "more") #alternative hypothesis
+
+DM.benchmark.keras.test <- DM.test(pred.benchmark.ea, 
+                                   keras.pred.ea, 
+                                   test.inf.ea, #observed values
+                                   loss.type = 'AE', #absolute error
+                                   h = 6,
+                                   c = TRUE, #Harvey-Leybourn-Newbold correction for small samples
+                                   H1 =  "less") #alternative hypothesis
+
+DM.var.keras.test <- DM.test(pred.var.ea, 
+                             keras.pred.ea,
+                             test.inf.ea, #observed values
+                             loss.type = 'AE', #asolute error
+                             h = 6,
+                             c = TRUE, #Harvey-Leybourn-Newbold correction for small samples
+                             H1 =  "less") #alternative hypothesis
+
+#note that higher h yields NaNs
+
+DM.benchmark.var.test
+DM.benchmark.keras.test
+DM.var.keras.test
+```
+
+In the case of EA, the test results show that accuracy is not the same among the models when setting the alpha threshold to 0.05. Finally, the test yields that the benchmark outperforms the VAR and that the NN outperforms the benchmark.
+
+# 1.3. NL
+```{r}
+DM.benchmark.var.test <- DM.test(pred.benchmark.nl, #forecast from model1
+                                 pred.var.nl, #forecast from model2
+                                 test.inf.nl, #observed values
+                                 loss.type = 'AE', #absolute error
+                                 h = 6,
+                                 c = TRUE, #Harvey-Leybourn-Newbold correction for small samples
+                                 H1 =  "same") #alternative hypothesis
+
+DM.benchmark.keras.test <- DM.test(pred.benchmark.nl, 
+                                   keras.pred.nl, 
+                                   test.inf.nl, #observed values
+                                   loss.type = 'AE', #absolute error
+                                   h = 6,
+                                   c = TRUE, #Harvey-Leybourn-Newbold correction for small samples
+                                   H1 =  "same") #alternative hypothesis
+
+DM.var.keras.test <- DM.test(pred.var.nl, 
+                             keras.pred.nl,
+                             test.inf.nl, #observed values
+                             loss.type = 'AE', #asolute error
+                             h = 6,
+                             c = TRUE, #Harvey-Leybourn-Newbold correction for small samples
+                             H1 =  "same") #alternative hypothesis
+
+#note that higher h yields NaNs
+
+DM.benchmark.var.test
+DM.benchmark.keras.test
+DM.var.keras.test
+```
+
+The test accepts the Null hypothesis of no accuracy difference between all models in the case of the NL. 
+
+# 1.4. CL
+```{r}
+DM.benchmark.var.test <- DM.test(pred.benchmark.cl, #forecast from model1
+                                 pred.var.cl, #forecast from model2
+                                 test.inf.cl, #observed values
+                                 loss.type = 'AE', #absolute error
+                                 h = 6,
+                                 c = TRUE, #Harvey-Leybourn-Newbold correction for small samples
+                                 H1 =  "same") #alternative hypothesis
+
+DM.benchmark.keras.test <- DM.test(pred.benchmark.cl, 
+                                   keras.pred.cl, 
+                                   test.inf.cl, #observed values
+                                   loss.type = 'AE', #absolute error
+                                   h = 6,
+                                   c = TRUE, #Harvey-Leybourn-Newbold correction for small samples
+                                   H1 =  "less") #alternative hypothesis
+
+DM.var.keras.test <- DM.test(pred.var.cl, 
+                             keras.pred.cl,
+                             test.inf.cl, #observed values
+                             loss.type = 'AE', #asolute error
+                             h = 6,
+                             c = TRUE, #Harvey-Leybourn-Newbold correction for small samples
+                             H1 =  "less") #alternative hypothesis
+
+#note that higher h yields NaNs
+
+DM.benchmark.var.test
+DM.benchmark.keras.test
+DM.var.keras.test
+```
+
+The tets shows no differences in accuracy between the benchmark and the VAR, but this idea is rejected when comparing both models to the NN in the case of CL. When testing whether the benchmark is less accurate than the NN (alternative hypothesis) and if the VAR has lesser accuracy than the NN (alternative hypothesis) we find that both Null hypotheses of no difference are rejected. This implies a greater performance of the NN over the other methods.
+
+# 1.5. MX
+```{r}
+DM.benchmark.var.test <- DM.test(pred.benchmark.mx, #forecast from model1
+                                 pred.var.mx, #forecast from model2
+                                 test.inf.mx, #observed values
+                                 loss.type = 'AE', #absolute error
+                                 h = 1,
+                                 c = TRUE, #Harvey-Leybourn-Newbold correction for small samples
+                                 H1 =  "same") #alternative hypothesis
+
+DM.benchmark.keras.test <- DM.test(pred.benchmark.mx, 
+                                   keras.pred.mx, 
+                                   test.inf.mx, #observed values
+                                   loss.type = 'AE', #absolute error
+                                   h = 1,
+                                   c = TRUE, #Harvey-Leybourn-Newbold correction for small samples
+                                   H1 =  "same") #alternative hypothesis
+
+DM.var.keras.test <- DM.test(pred.var.mx, 
+                             keras.pred.mx,
+                             test.inf.mx, #observed values
+                             loss.type = 'AE', #asolute error
+                             h = 1,
+                             c = TRUE, #Harvey-Leybourn-Newbold correction for small samples
+                             H1 =  "same") #alternative hypothesis
+
+#note that higher h yields NaNs
+
+DM.benchmark.var.test
+DM.benchmark.keras.test
+DM.var.keras.test
+```
+
+In the case of MX, the test results show that accuracy is the same among the models when setting the alpha threshold to 0.05.
+
+Since the forecast was not large enough (12 months), we need to use different metrics to compensate for the lack of trustworthiness of the DM test.
+
+## 2. Average Error
+
+Average Error is a simple metric, but it is easy to understand.
+
+# 2.1. US
+
+```{r}
+benchmark.mean <- mean(error.benchmark.us)
+var.mean <- mean(error.var.us)
+nn.mean <- mean(keras.error.us)
+
+benchmark.mean
+var.mean
+nn.mean
+
+```
+
+As we can see, output is really similar, specially between the benchmark and the NN.
+
+# 2.2.EA
+
+```{r}
+benchmark.mean <- mean(error.benchmark.ea)
+var.mean <- mean(error.var.ea)
+nn.mean <- mean(keras.error.ea)
+
+benchmark.mean
+var.mean
+nn.mean
+
+```
+
+This time, although the diference is still less than 60 bps, the NN was outperformed.
+
+# 2.3. NL
+
+```{r}
+benchmark.mean <- mean(error.benchmark.nl)
+var.mean <- mean(error.var.nl)
+nn.mean <- mean(keras.error.nl)
+
+benchmark.mean
+var.mean
+nn.mean
+
+```
+
+In the case of NL, the VAR yielded the lower average error, followed by the NN and then the benchmark. However, the differences are still low.
+
+# 2.4. CL
+
+```{r}
+benchmark.mean <- mean(error.benchmark.cl)
+var.mean <- mean(error.var.cl)
+nn.mean <- mean(keras.error.cl)
+
+benchmark.mean
+var.mean
+nn.mean
+
+```
+
+Again, the differences are almost zero.
+
+# 2.5. MX
+
+```{r}
+benchmark.mean <- mean(error.benchmark.mx)
+var.mean <- mean(error.var.mx)
+nn.mean <- mean(keras.error.mx)
+
+benchmark.mean
+var.mean
+nn.mean
+
+```
+
+Unsurprisingly, the differences are almost zero, However the NN has the lowest error (15 bps)
+
+It may be of interest to see the accuracy in the shrto and "long" term.
+
+## 3. Present Biased Average
+
+I use this metric in order to compare accuracy in the short run by decreasing weights in time.
+
+# 3.1. US
+
+```{r}
+benchmark.mean <- weighted.mean(abs(error.benchmark.us), w.PBA)
+var.mean <- weighted.mean(abs(error.var.us), w.PBA)
+nn.mean <- weighted.mean(abs(keras.error.us), w.PBA)
+
+benchmark.mean
+var.mean
+nn.mean
+
+```
+
+In the case of the US, in the short run they are practically the same. The difference across models is less than 1 bp.
+
+# 3.2. EA
+
+```{r}
+benchmark.mean <- weighted.mean(abs(error.benchmark.ea), w.PBA)
+var.mean <- weighted.mean(abs(error.var.ea), w.PBA)
+nn.mean <- weighted.mean(abs(keras.error.ea), w.PBA)
+
+benchmark.mean
+var.mean
+nn.mean
+
+```
+
+In the case of the EA, the difference of short term accuracy is larger, and seems that the more complex the model the less accurate.
+
+## 3.3. NL
+
+```{r}
+benchmark.mean <- weighted.mean(abs(error.benchmark.nl), w.PBA)
+var.mean <- weighted.mean(abs(error.var.nl), w.PBA)
+nn.mean <- weighted.mean(abs(keras.error.nl), w.PBA)
+
+benchmark.mean
+var.mean
+nn.mean
+
+```
+
+In the NL, the difference is also noticeable when comparing the VAR and the other models.
+
+## 3.4. CL
+
+```{r}
+benchmark.mean <- weighted.mean(abs(error.benchmark.cl), w.PBA)
+var.mean <- weighted.mean(abs(error.var.cl), w.PBA)
+nn.mean <- weighted.mean(abs(keras.error.cl), w.PBA)
+
+benchmark.mean
+var.mean
+nn.mean
+
+```
+
+In the case of CL, the difference is not much, but the benchmark is 41% less accurate than the NN according to this metric, and 20% less accurate than the VAR.
+
+
+## 3.5. MX
+
+```{r}
+benchmark.mean <- weighted.mean(abs(error.benchmark.mx), w.PBA)
+var.mean <- weighted.mean(abs(error.var.mx), w.PBA)
+nn.mean <- weighted.mean(abs(keras.error.mx), w.PBA)
+
+benchmark.mean
+var.mean
+nn.mean
+
+```
+
+When comparing performance for MX, we see that the NN performs about 50% (20 bps) better than the other models.
+
+
+## 4. Present Punishing Average
+
+This metric is the exact opposite of the present bias average, since its weights increase in time from (almost) zero to one.
+
+# 3.1. US
+
+```{r}
+benchmark.mean <- weighted.mean(abs(error.benchmark.us), w.PPA)
+var.mean <- weighted.mean(abs(error.var.us), w.PPA)
+nn.mean <- weighted.mean(abs(keras.error.us), w.PPA)
+
+benchmark.mean
+var.mean
+nn.mean
+
+```
+
+In the case of the US, in the LONG run the benchmark and the NN are practically the same. The VAR, however, seems to be outperformed.
+
+# 3.2. EA
+
+```{r}
+benchmark.mean <- weighted.mean(abs(error.benchmark.ea), w.PPA)
+var.mean <- weighted.mean(abs(error.var.ea), w.PPA)
+nn.mean <- weighted.mean(abs(keras.error.ea), w.PPA)
+benchmark.mean
+var.mean
+nn.mean
+
+```
+
+In the case of the EA, the difference of long term accuracy is more noticeable, since the VAR performs 20 bps worse than the benchmark and the NN performs 30 bps worse than the VAR.
+
+## 3.3. NL
+
+```{r}
+benchmark.mean <- weighted.mean(abs(error.benchmark.nl), w.PPA)
+var.mean <- weighted.mean(abs(error.var.nl), w.PPA)
+nn.mean <- weighted.mean(abs(keras.error.nl), w.PPA)
+
+benchmark.mean
+var.mean
+nn.mean
+
+```
+
+In the NL, the difference is also noticeable. The long term error of the NN is almost 2.9 times greater than the VAR, and the benchmark's error is over 4 times larger than the VAR's.
+
+## 3.4. CL
+
+```{r}
+benchmark.mean <- weighted.mean(abs(error.benchmark.cl), w.PPA)
+var.mean <- weighted.mean(abs(error.var.cl), w.PPA)
+nn.mean <- weighted.mean(abs(keras.error.cl), w.PPA)
+
+benchmark.mean
+var.mean
+nn.mean
+
+```
+
+In the case of CL, the difference is not much, but the benchmark is the less accurate model in the long term.
+
+
+## 3.5. MX
+
+```{r}
+benchmark.mean <- weighted.mean(abs(error.benchmark.mx), w.PPA)
+var.mean <- weighted.mean(abs(error.var.mx), w.PPA)
+nn.mean <- weighted.mean(abs(keras.error.mx), w.PPA)
+
+benchmark.mean
+var.mean
+nn.mean
+
+```
+
+When comparing performance for MX, we see that the VAR is the best model when looking for long term accuracy (20 and 80 bps better than NN and benchmark, respectively).
+
+

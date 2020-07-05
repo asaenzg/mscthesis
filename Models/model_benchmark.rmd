@@ -14,6 +14,8 @@ library(ggplot2)
 library(tidyverse)
 library(stargazer)
 library(forecast)
+library(tseries)
+library(scales)
 ```
 
 
@@ -35,11 +37,43 @@ benchmark
 
 checkresiduals(benchmark)
 
-fcast.benchmark <- forecast(benchmark, h = 12)
-autoplot(fcast.benchmark)
 
+plotdate <- as.Date(dataUS$mdate[1:nrow(train_us)])
+benchmark.resid <- as.data.frame(benchmark$residuals)
+resid.acf <- acf(benchmark.resid)
+
+
+
+
+resid.plot <- ggplot(data=benchmark.resid, aes(x=plotdate, y=x)) + 
+  geom_line() + labs(x = 'Residuals', y = 'Date', title ='US inflation residuals from AR(1) model') + theme_bw()
+resid.plot
+
+acf.plot <- autoplot(resid.acf, main = 'US AR(1) residuals autocorrelation function') + theme_bw()
+acf.plot
+
+resid.dist.plot <- ggplot(data=benchmark.resid, aes(x)) +
+  geom_histogram(aes(y=..density.., fill = ..count..)) + 
+  stat_function(fun=dnorm,
+                color="red",
+                args=list(mean=mean(as.ts(benchmark.resid)), 
+                          sd=sd(as.ts(benchmark.resid)))) +
+  labs(x = 'Residuals', y = 'Density', title = 'US AR(1) residuals distribution') + theme_bw()
+resid.dist.plot
+
+norm.test <- jarque.bera.test(as.ts(benchmark.resid))
+norm.test
+
+fcast.benchmark <- forecast(benchmark, h = 12)
+autoplot(as.ts(inf), series = 'Data', 
+         main = 'US inflation AR(1) forecast') +
+  autolayer(fitted(fcast.benchmark), series = 'Fitted') +
+  autolayer(fcast.benchmark, series = 'Forecast') +
+  xlab('Time Period') + ylab('Inflation') + theme_bw()
+pred.benchmark.us <- fcast.benchmark$mean
 error.benchmark.us <- fcast.benchmark$mean - actual.value
-autoplot(error.benchmark.us)
+autoplot(error.benchmark.us, main = 'US AR(1) forecast errors') + 
+  xlab('Time Period') + ylab('Prediction error') + theme_bw()
 ```
 
 ## Benchmark for the EA
@@ -54,11 +88,45 @@ benchmark
 
 checkresiduals(benchmark)
 
+plotdate <- as.Date(dataEA$mdate[1:nrow(train_ea)])
+benchmark.resid <- as.data.frame(benchmark$residuals)
+resid.acf <- acf(benchmark.resid)
+
+
+
+
+resid.plot <- ggplot(data=benchmark.resid, aes(x=plotdate, y=x)) + 
+  geom_line() + labs(x = 'Residuals', y = 'Date', title ='EA inflation residuals from AR(1) model') + theme_bw()
+resid.plot
+
+acf.plot <- autoplot(resid.acf, main = 'EA AR(1) residuals autocorrelation function') + theme_bw()
+acf.plot
+
+resid.dist.plot <- ggplot(data=benchmark.resid, aes(x)) +
+  geom_histogram(aes(y=..density.., fill = ..count..)) + 
+  stat_function(fun=dnorm,
+                color="red",
+                args=list(mean=mean(as.ts(benchmark.resid)), 
+                          sd=sd(as.ts(benchmark.resid))))  + 
+  labs(x = 'Residuals', y = 'Density', title = 'EA AR(1) residuals distribution') + theme_bw()
+resid.dist.plot
+
+norm.test <- jarque.bera.test(as.ts(benchmark.resid))
+norm.test
+
+fcast.benchmark <- forecast(benchmark, h = 12)
+autoplot(as.ts(inf), series = 'Data', 
+         main = 'EA inflation AR(1) forecast') +
+  autolayer(fitted(fcast.benchmark), series = 'Fitted') +
+  autolayer(fcast.benchmark, series = 'Forecast') +
+  xlab('Time Period') + ylab('Inflation') + theme_bw()
+
 fcast.benchmark <- forecast(benchmark, h = 12)
 autoplot(fcast.benchmark)
-
+pred.benchmark.ea <- fcast.benchmark$mean
 error.benchmark.ea <- fcast.benchmark$mean - actual.value
-autoplot(error.benchmark.ea)
+autoplot(error.benchmark.ea, main = 'EA AR(1) forecast errors') + 
+  xlab('Time Period') + ylab('Prediction error') + theme_bw()
 ```
 
 ## Benchmark for the NL
@@ -73,11 +141,45 @@ benchmark
 
 checkresiduals(benchmark)
 
+plotdate <- as.Date(dataNL$mdate[1:nrow(train_nl)])
+benchmark.resid <- as.data.frame(benchmark$residuals)
+resid.acf <- acf(benchmark.resid)
+
+
+
+
+resid.plot <- ggplot(data=benchmark.resid, aes(x=plotdate, y=x)) + 
+  geom_line() + labs(x = 'Residuals', y = 'Date', title ='NL inflation residuals from AR(1) model') + theme_bw()
+resid.plot
+
+norm.test <- jarque.bera.test(as.ts(benchmark.resid))
+norm.test
+
+acf.plot <- autoplot(resid.acf, main = 'NL AR(1) residuals autocorrelation function') + theme_bw()
+acf.plot
+
+resid.dist.plot <- ggplot(data=benchmark.resid, aes(x)) +
+  geom_histogram(aes(y=..density.., fill = ..count..)) + 
+  stat_function(fun=dnorm,
+                color="red",
+                args=list(mean=mean(as.ts(benchmark.resid)), 
+                          sd=sd(as.ts(benchmark.resid)))) + 
+  labs(x = 'Residuals', y = 'Density', title = 'NL AR(1) residuals distribution') + theme_bw()
+resid.dist.plot
+
+fcast.benchmark <- forecast(benchmark, h = 12)
+autoplot(as.ts(inf), series = 'Data', 
+         main = 'NL inflation AR(1) forecast') +
+  autolayer(fitted(fcast.benchmark), series = 'Fitted') +
+  autolayer(fcast.benchmark, series = 'Forecast') +
+  xlab('Time Period') + ylab('Inflation') + theme_bw()
+
 fcast.benchmark <- forecast(benchmark, h = 12)
 autoplot(fcast.benchmark)
-
+pred.benchmark.nl <- fcast.benchmark$mean
 error.benchmark.nl <- fcast.benchmark$mean - actual.value
-autoplot(error.benchmark.nl)
+autoplot(error.benchmark.nl, main = 'NL AR(1) forecast errors') + 
+  xlab('Time Period') + ylab('Prediction error') + theme_bw()
 ```
 
 ## Benchmark for CL
@@ -92,11 +194,45 @@ benchmark
 
 checkresiduals(benchmark)
 
+plotdate <- as.Date(dataCL$mdate[1:nrow(train_cl)])
+benchmark.resid <- as.data.frame(benchmark$residuals)
+resid.acf <- acf(benchmark.resid)
+
+
+
+
+resid.plot <- ggplot(data=benchmark.resid, aes(x=plotdate, y=x)) + 
+  geom_line() + labs(x = 'Residuals', y = 'Date', title ='CL inflation residuals from AR(1) model') + theme_bw()
+resid.plot
+
+acf.plot <- autoplot(resid.acf, main = 'CL AR(1) residuals autocorrelation function') + theme_bw()
+acf.plot
+
+resid.dist.plot <- ggplot(data=benchmark.resid, aes(x)) +
+  geom_histogram(aes(y=..density.., fill = ..count..)) + 
+  stat_function(fun=dnorm,
+                color="red",
+                args=list(mean=mean(as.ts(benchmark.resid)), 
+                          sd=sd(as.ts(benchmark.resid)))) + 
+  labs(x = 'Residuals', y = 'Density', title = 'CL AR(1) residuals distribution') + theme_bw()
+resid.dist.plot
+
+norm.test <- jarque.bera.test(as.ts(benchmark.resid))
+norm.test
+
+fcast.benchmark <- forecast(benchmark, h = 12)
+autoplot(as.ts(inf), series = 'Data', 
+         main = 'CL inflation AR(1) forecast') +
+  autolayer(fitted(fcast.benchmark), series = 'Fitted') +
+  autolayer(fcast.benchmark, series = 'Forecast') +
+  xlab('Time Period') + ylab('Inflation') + theme_bw()
+
 fcast.benchmark <- forecast(benchmark, h = 12)
 autoplot(fcast.benchmark)
-
+pred.benchmark.cl <- fcast.benchmark$mean
 error.benchmark.cl <- fcast.benchmark$mean - actual.value
-autoplot(error.benchmark.cl)
+autoplot(error.benchmark.cl, main = 'CL AR(1) forecast errors') + 
+  xlab('Time Period') + ylab('Prediction error') + theme_bw()
 ```
 
 ## Benchmark for MX
@@ -111,11 +247,45 @@ benchmark
 
 checkresiduals(benchmark)
 
+plotdate <- as.Date(dataMX$mdate[1:nrow(train_mx)])
+benchmark.resid <- as.data.frame(benchmark$residuals)
+resid.acf <- acf(benchmark.resid)
+
+
+
+
+resid.plot <- ggplot(data=benchmark.resid, aes(x=plotdate, y=x)) + 
+  geom_line() + labs(x = 'Residuals', y = 'Date', title ='MX inflation residuals from AR(1) model') + theme_bw()
+resid.plot
+
+acf.plot <- autoplot(resid.acf, main = 'MX AR(1) residuals autocorrelation function') + theme_bw()
+acf.plot
+
+resid.dist.plot <- ggplot(data=benchmark.resid, aes(x)) +
+  geom_histogram(aes(y=..density.., fill = ..count..)) + 
+  stat_function(fun=dnorm,
+                color="red",
+                args=list(mean=mean(as.ts(benchmark.resid)), 
+                          sd=sd(as.ts(benchmark.resid)))) + 
+  labs(x = 'Residuals', y = 'Density', title = 'MX AR(1) residuals distribution') + theme_bw()
+resid.dist.plot
+
+norm.test <- jarque.bera.test(as.ts(benchmark.resid))
+norm.test
+
+fcast.benchmark <- forecast(benchmark, h = 12)
+autoplot(as.ts(inf), series = 'Data', 
+         main = 'MX inflation AR(1) forecast') +
+  autolayer(fitted(fcast.benchmark), series = 'Fitted') +
+  autolayer(fcast.benchmark, series = 'Forecast') +
+  xlab('Time Period') + ylab('Inflation') + theme_bw()
+
 fcast.benchmark <- forecast(benchmark, h = 12)
 autoplot(fcast.benchmark)
-
+pred.benchmark.mx <- fcast.benchmark$mean
 error.benchmark.mx <- fcast.benchmark$mean - actual.value
-autoplot(error.benchmark.mx)
+autoplot(error.benchmark.mx, main = 'MX AR(1) forecast errors') + 
+  xlab('Time Period') + ylab('Prediction error') + theme_bw()
 ```
 
 

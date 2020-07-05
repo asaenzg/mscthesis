@@ -15,6 +15,7 @@ library(tidyverse)
 library(vars)
 library(stargazer)
 library(forecast)
+library(tseries)
 ```
 
 
@@ -22,9 +23,10 @@ Here I present a restricted VAR model for each economy. The model takes into acc
 
 ##VAR for the US
 
-The first step is to choose an appropriate number of lags for the model. Since Ivanov and Kilian (2005) find that Akaike's Information Criterion (AIC) tends to produce the most accurate structural and semi-structural impulse response, I will be using this criterion.
+The first step is to choose an appropriate number of lags for the model. Since Ivanov and Kilian (2005) sugests that Akaike's Information Criterion (AIC) tends to produce the most accurate structural and semi-structural impulse response, I will be using this criterion.
 
 ```{r VAR US}
+inf <- train_us[, 2]
 predictors <- length(dataUS)
 
 data.var.order <- dataUS[, 2:predictors] #Column 1 is a dates array
@@ -37,19 +39,49 @@ m.var
 
 checkresiduals(m.var$varresult$infUS)
 
-acf(resid(m.var))
+plotdate <- as.Date(dataUS$mdate[1:nrow(train_us)])
+m.var.resid <- as.data.frame(m.var$varresult$infUS$residuals)
+colnames(m.var.resid) <- 'x'
+resid.acf <- acf(resid(m.var))
 
-fcast.var <- forecast(m.var$datamat$infUS , h = 12)
-autoplot(fcast.var)
+
+resid.plot <- ggplot(data=m.var.resid, aes(x=plotdate, y=x)) + 
+  geom_line() + labs(x = 'Residuals', y = 'Date', title ='US inflation residuals from VAR(3) model')
+resid.plot
+
+acf.plot <- autoplot(resid.acf, main = 'US VAR(3) residuals autocorrelation function')
+acf.plot
+
+resid.dist.plot <- ggplot(data=m.var.resid, aes(x)) +
+  geom_histogram(aes(y=..density.., fill = ..count..)) + 
+  stat_function(fun=dnorm,
+                color="red",
+                args=list(mean=mean(as.ts(m.var.resid)), 
+                          sd=sd(as.ts(m.var.resid)))) +
+  labs(x = 'Residuals', y = 'Density', title = 'US VAR(3) residuals distribution')
+resid.dist.plot
+
+norm.test <- jarque.bera.test(as.ts(m.var.resid))
+norm.test
+
+fcast.var <- forecast(m.var$datamat$infUS, h = 12)
+autoplot(as.ts(inf), series = 'Data', 
+         main = 'US inflation VAR(3) forecast') +
+  autolayer(fitted(fcast.var), series = 'Fitted') +
+  autolayer(fcast.var, series = 'Forecast') +
+  xlab('Time Period') + ylab('Inflation')
+
 
 error.var.us <- fcast.var$mean - test_us[, 2] #Inflation is in column 2
-autoplot(error.var.us)
+autoplot(error.var.us, main = 'US inflation VAR(3) forecast errors') + 
+  xlab('Time Period') + ylab('Prediction error')
 ```
 
 
 ##VAR for the EA
 
 ```{r VAR EA}
+inf <- train_ea[, 2]
 predictors <- length(dataEA)
 
 data.var.order <- dataEA[, 2:predictors] #Column 1 is a dates array
@@ -62,13 +94,42 @@ m.var
 
 checkresiduals(m.var$varresult$infEA)
 
-acf(resid(m.var))
+plotdate <- as.Date(dataUS$mdate[1:nrow(train_ea)])
+m.var.resid <- as.data.frame(m.var$varresult$infEA$residuals)
+colnames(m.var.resid) <- 'x'
+resid.acf <- acf(resid(m.var))
 
-fcast.var <- forecast(m.var$datamat$infEA , h = 12)
-autoplot(fcast.var)
+
+resid.plot <- ggplot(data=m.var.resid, aes(x=plotdate, y=x)) + 
+  geom_line() + labs(x = 'Residuals', y = 'Date', title ='EA inflation residuals from VAR(3) model')
+resid.plot
+
+acf.plot <- autoplot(resid.acf, main = 'EA VAR(3) residuals autocorrelation function')
+acf.plot
+
+resid.dist.plot <- ggplot(data=m.var.resid, aes(x)) +
+  geom_histogram(aes(y=..density.., fill = ..count..)) + 
+  stat_function(fun=dnorm,
+                color="red",
+                args=list(mean=mean(as.ts(m.var.resid)), 
+                          sd=sd(as.ts(m.var.resid)))) +
+  labs(x = 'Residuals', y = 'Density', title = 'EA VAR(3) residuals distribution')
+resid.dist.plot
+
+norm.test <- jarque.bera.test(as.ts(m.var.resid))
+norm.test
+
+fcast.var <- forecast(m.var$datamat$infEA, h = 12)
+autoplot(as.ts(inf), series = 'Data', 
+         main = 'EA inflation VAR(3) forecast') +
+  autolayer(fitted(fcast.var), series = 'Fitted') +
+  autolayer(fcast.var, series = 'Forecast') +
+  xlab('Time Period') + ylab('Inflation')
+
 
 error.var.ea <- fcast.var$mean - test_ea[, 2] #Inflation is in column 2
-autoplot(error.var.ea)
+autoplot(error.var.ea, main = 'EA inflation VAR(3) forecast errors') + 
+  xlab('Time Period') + ylab('Prediction error')
 ```
 
 
@@ -77,6 +138,7 @@ autoplot(error.var.ea)
 ##VAR for the NL
 
 ```{r VAR NL}
+inf <- train_nl[, 2]
 predictors <- length(dataNL)
 
 data.var.order <- dataNL[, 2:predictors] #Column 1 is a dates array
@@ -89,19 +151,49 @@ m.var
 
 checkresiduals(m.var$varresult$infNL)
 
-acf(resid(m.var))
+plotdate <- as.Date(dataNL$mdate[1:nrow(train_nl)])
+m.var.resid <- as.data.frame(m.var$varresult$infNL$residuals)
+colnames(m.var.resid) <- 'x'
+resid.acf <- acf(resid(m.var))
 
-fcast.var <- forecast(m.var$datamat$infNL , h = 12)
-autoplot(fcast.var)
+
+resid.plot <- ggplot(data=m.var.resid, aes(x=plotdate, y=x)) + 
+  geom_line() + labs(x = 'Residuals', y = 'Date', title ='NL inflation residuals from VAR(3) model')
+resid.plot
+
+acf.plot <- autoplot(resid.acf, main = 'NL VAR(3) residuals autocorrelation function')
+acf.plot
+
+resid.dist.plot <- ggplot(data=m.var.resid, aes(x)) +
+  geom_histogram(aes(y=..density.., fill = ..count..)) + 
+  stat_function(fun=dnorm,
+                color="red",
+                args=list(mean=mean(as.ts(m.var.resid)), 
+                          sd=sd(as.ts(m.var.resid)))) +
+  labs(x = 'Residuals', y = 'Density', title = 'NL VAR(3) residuals distribution')
+resid.dist.plot
+
+norm.test <- jarque.bera.test(as.ts(m.var.resid))
+norm.test
+
+fcast.var <- forecast(m.var$datamat$infNL, h = 12)
+autoplot(as.ts(inf), series = 'Data', 
+         main = 'NL inflation VAR(3) forecast') +
+  autolayer(fitted(fcast.var), series = 'Fitted') +
+  autolayer(fcast.var, series = 'Forecast') +
+  xlab('Time Period') + ylab('Inflation')
+
 
 error.var.nl <- fcast.var$mean - test_nl[, 2] #Inflation is in column 2
-autoplot(error.var.nl)
+autoplot(error.var.nl, main = 'NL inflation VAR(3) forecast errors') + 
+  xlab('Time Period') + ylab('Prediction error')
 ```
 
 
 
 ##VAR for CL
 ```{r VAR CL}
+inf <- train_cl[, 2]
 predictors <- length(dataCL)
 
 data.var.order <- dataCL[, 2:predictors] #Column 1 is a dates array
@@ -114,18 +206,48 @@ m.var
 
 checkresiduals(m.var$varresult$infCL)
 
-acf(resid(m.var))
+plotdate <- as.Date(dataUS$mdate[1:nrow(train_cl)])
+m.var.resid <- as.data.frame(m.var$varresult$infCL$residuals)
+colnames(m.var.resid) <- 'x'
+resid.acf <- acf(resid(m.var))
 
-fcast.var <- forecast(m.var$datamat$infCL , h = 12)
-autoplot(fcast.var)
+
+resid.plot <- ggplot(data=m.var.resid, aes(x=plotdate, y=x)) + 
+  geom_line() + labs(x = 'Residuals', y = 'Date', title ='CL inflation residuals from VAR(4) model')
+resid.plot
+
+acf.plot <- autoplot(resid.acf, main = 'CL VAR(4) residuals autocorrelation function')
+acf.plot
+
+resid.dist.plot <- ggplot(data=m.var.resid, aes(x)) +
+  geom_histogram(aes(y=..density.., fill = ..count..)) + 
+  stat_function(fun=dnorm,
+                color="red",
+                args=list(mean=mean(as.ts(m.var.resid)), 
+                          sd=sd(as.ts(m.var.resid)))) +
+  labs(x = 'Residuals', y = 'Density', title = 'CL VAR(4) residuals distribution')
+resid.dist.plot
+
+norm.test <- jarque.bera.test(as.ts(m.var.resid))
+norm.test
+
+fcast.var <- forecast(m.var$datamat$infCL, h = 12)
+autoplot(as.ts(inf), series = 'Data', 
+         main = 'CL inflation VAR(4) forecast') +
+  autolayer(fitted(fcast.var), series = 'Fitted') +
+  autolayer(fcast.var, series = 'Forecast') +
+  xlab('Time Period') + ylab('Inflation')
+
 
 error.var.cl <- fcast.var$mean - test_cl[, 2] #Inflation is in column 2
-autoplot(error.var.cl)
+autoplot(error.var.cl, main = 'CL inflation VAR(4) forecast errors') + 
+  xlab('Time Period') + ylab('Prediction error')
 ```
 
 ##VAR for MX
 
 ```{r VAR MX}
+inf <- train_mx[, 2]
 predictors <- length(dataMX)
 
 data.var.order <- dataMX[, 2:predictors] #Column 1 is a dates array
@@ -138,11 +260,40 @@ m.var
 
 checkresiduals(m.var$varresult$infMX)
 
-acf(resid(m.var))
+plotdate <- as.Date(dataUS$mdate[1:nrow(train_mx)])
+m.var.resid <- as.data.frame(m.var$varresult$infMX$residuals)
+colnames(m.var.resid) <- 'x'
+resid.acf <- acf(resid(m.var))
 
-fcast.var <- forecast(m.var$datamat$infMX , h = 12)
-autoplot(fcast.var)
+
+resid.plot <- ggplot(data=m.var.resid, aes(x=plotdate, y=x)) + 
+  geom_line() + labs(x = 'Residuals', y = 'Date', title ='MX inflation residuals from VAR(12) model')
+resid.plot
+
+acf.plot <- autoplot(resid.acf, main = 'MX VAR(12) residuals autocorrelation function')
+acf.plot
+
+resid.dist.plot <- ggplot(data=m.var.resid, aes(x)) +
+  geom_histogram(aes(y=..density.., fill = ..count..)) + 
+  stat_function(fun=dnorm,
+                color="red",
+                args=list(mean=mean(as.ts(m.var.resid)), 
+                          sd=sd(as.ts(m.var.resid)))) +
+  labs(x = 'Residuals', y = 'Density', title = 'MX VAR(12) residuals distribution')
+resid.dist.plot
+
+norm.test <- jarque.bera.test(as.ts(m.var.resid))
+norm.test
+
+fcast.var <- forecast(m.var$datamat$infMX, h = 12)
+autoplot(as.ts(inf), series = 'Data', 
+         main = 'MX inflation VAR(12) forecast') +
+  autolayer(fitted(fcast.var), series = 'Fitted') +
+  autolayer(fcast.var, series = 'Forecast') +
+  xlab('Time Period') + ylab('Inflation')
+
 
 error.var.mx <- fcast.var$mean - test_mx[, 2] #Inflation is in column 2
-autoplot(error.var.mx)
+autoplot(error.var.mx, main = 'MX inflation VAR(12) forecast errors') + 
+  xlab('Time Period') + ylab('Prediction error')
 ```

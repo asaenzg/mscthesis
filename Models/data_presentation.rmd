@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = TRUE, results = 'hide')
 library(ggplot2)
 library(tidyverse)
 library(readxl)
+
 ```
 
 
@@ -66,42 +67,42 @@ pus1 <- ggplot(data = dataUS, aes(x = mdate)) +
   geom_line(aes(y = infUS, color = "Inflation")) +
   geom_line(aes(y = intrateUS, color = "Interest Rate")) +
   labs(x = "", y = "", color = "Legend", title = "Inflation and Interest Rate (US)") +
-  scale_color_manual(values = pus1colours)
+  scale_color_manual(values = pus1colours) + theme_bw()
  
 pus2colours <- c("Inflation" = "darkred", "M2" = "steelblue")
 pus2 <- ggplot(data = dataUS, aes(x = mdate)) + 
   geom_line(aes(y = infUS, color = "Inflation")) +
   geom_line(aes(y = M2US, color = "M2")) +
   labs(x = "", y = "", color = "Legend", title = "Inflation and M2 Money Supply (US)") +
-  scale_color_manual(values = pus2colours)
+  scale_color_manual(values = pus2colours) + theme_bw()
 
 pus3colours <- c("Inflation" = "darkred", "Output Gap" = "steelblue")
 pus3 <- ggplot(data = dataUS, aes(x = mdate)) + 
   geom_line(aes(y = infUS, color = "Inflation")) +
   geom_line(aes(y = OutputGapUS, color = "Output Gap")) +
   labs(x = "", y = "", color = "Legend", title = "Inflation and Output Gap (US)") +
-  scale_color_manual(values = pus3colours)
+  scale_color_manual(values = pus3colours) + theme_bw()
 
 pus4colours <- c("Inflation" = "darkred", "Unemployment Rate" = "steelblue")
 pus4 <- ggplot(data = dataUS, aes(x = mdate)) + 
   geom_line(aes(y = infUS, color = "Inflation")) +
   geom_line(aes(y = urateUS, color = "Unemployment Rate")) +
   labs(x = "", y = "", color = "Legend", title = "Inflation and Unemployment Rate (US)") +
-  scale_color_manual(values = pus4colours)
+  scale_color_manual(values = pus4colours) + theme_bw()
 
 pus5colours <- c("Inflation" = "darkred", "Real Exchange Rate" = "steelblue")
 pus5 <- ggplot(data = dataUS, aes(x = mdate)) + 
   geom_line(aes(y = infUS, color = "Inflation")) +
   geom_line(aes(y = RERUS, color = "Real Exchange Rate")) +
   labs(x = "", y = "", color = "Legend", title = "Inflation and Real Exchange Rate (US)") +
-  scale_color_manual(values = pus5colours)
+  scale_color_manual(values = pus5colours) + theme_bw()
 
 pus6colours <- c("Inflation" = "darkred", "Real Wages" = "steelblue")
 pus6 <- ggplot(data = dataUS, aes(x = mdate)) + 
   geom_line(aes(y = infUS, color = "Inflation")) +
   geom_line(aes(y = realWUS, color = "Real Wages")) +
   labs(x = "", y = "", color = "Legend", title = "Inflation and Real Wages (US)") +
-  scale_color_manual(values = pus6colours)
+  scale_color_manual(values = pus6colours) + theme_bw()
 
 pus1
 pus2
@@ -152,35 +153,35 @@ pea1 <- ggplot(data = dataEA, aes(x = mdateEA)) +
   geom_line(aes(y = infEA, color = "Inflation")) +
   geom_line(aes(y = intrateEA, color = "Interest Rate")) +
   labs(x = "", y = "", color = "Legend", title = "Inflation and Interest Rate (EA)") +
-  scale_color_manual(values = pea1colours)
+  scale_color_manual(values = pea1colours) + theme_bw()
  
 pea2colours <- c("Inflation" = "darkred", "M2" = "steelblue")
 pea2 <- ggplot(data = dataEA, aes(x = mdateEA)) + 
   geom_line(aes(y = infEA, color = "Inflation")) +
   geom_line(aes(y = M2EA, color = "M2")) +
   labs(x = "", y = "", color = "Legend", title = "Inflation and M2 Money Supply (EA)") +
-  scale_color_manual(values = pea2colours)
+  scale_color_manual(values = pea2colours) + theme_bw()
 
 pea3colours <- c("Inflation" = "darkred", "Output Gap" = "steelblue")
 pea3 <- ggplot(data = dataEA, aes(x = mdateEA)) + 
   geom_line(aes(y = infEA, color = "Inflation")) +
   geom_line(aes(y = OutputGapEA, color = "Output Gap")) +
   labs(x = "", y = "", color = "Legend", title = "Inflation and Output Gap (EA)") +
-  scale_color_manual(values = pea3colours)
+  scale_color_manual(values = pea3colours) + theme_bw()
 
 pea4colours <- c("Inflation" = "darkred", "Unemployment Rate" = "steelblue")
 pea4 <- ggplot(data = dataEA, aes(x = mdateEA)) + 
   geom_line(aes(y = infEA, color = "Inflation")) +
   geom_line(aes(y = urateEA, color = "Unemployment Rate")) +
   labs(x = "", y = "", color = "Legend", title = "Inflation and Unemployment Rate (EA)") +
-  scale_color_manual(values = pea4colours)
+  scale_color_manual(values = pea4colours) + theme_bw()
 
 pea5colours <- c("Inflation" = "darkred", "Real Exchange Rate" = "steelblue")
 pea5 <- ggplot(data = dataEA, aes(x = mdateEA)) + 
   geom_line(aes(y = infEA, color = "Inflation")) +
   geom_line(aes(y = REREA, color = "Real Exchange Rate")) +
   labs(x = "", y = "", color = "Legend", title = "Inflation and Real Exchange Rate (EA)") +
-  scale_color_manual(values = pea5colours)
+  scale_color_manual(values = pea5colours) + theme_bw()
 
 pea1
 pea2
@@ -233,42 +234,42 @@ pnl1 <- ggplot(data = dataNL, aes(x = mdateNL)) +
   geom_line(aes(y = infNL, color = "Inflation")) +
   geom_line(aes(y = intrateNL, color = "Interest Rate")) +
   labs(x = "", y = "", color = "Legend", title = "Inflation and Interest Rate (NL)") +
-  scale_color_manual(values = pnl1colours)
+  scale_color_manual(values = pnl1colours) + theme_bw()
  
 pnl2colours <- c("Inflation" = "darkred", "M2" = "steelblue")
 pnl2 <- ggplot(data = dataNL, aes(x = mdateNL)) + 
   geom_line(aes(y = infNL, color = "Inflation")) +
   geom_line(aes(y = M2NL, color = "M2")) +
   labs(x = "", y = "", color = "Legend", title = "Inflation and M2 Money Supply (NL)") +
-  scale_color_manual(values = pnl2colours)
+  scale_color_manual(values = pnl2colours) + theme_bw()
 
 pnl3colours <- c("Inflation" = "darkred", "Output Gap" = "steelblue")
 pnl3 <- ggplot(data = dataNL, aes(x = mdateNL)) + 
   geom_line(aes(y = infNL, color = "Inflation")) +
   geom_line(aes(y = OutputGapNL, color = "Output Gap")) +
   labs(x = "", y = "", color = "Legend", title = "Inflation and Output Gap (NL)") +
-  scale_color_manual(values = pnl3colours)
+  scale_color_manual(values = pnl3colours) + theme_bw()
 
 pnl4colours <- c("Inflation" = "darkred", "Unemployment Rate" = "steelblue")
 pnl4 <- ggplot(data = dataNL, aes(x = mdateNL)) + 
   geom_line(aes(y = infNL, color = "Inflation")) +
   geom_line(aes(y = urateNL, color = "Unemployment Rate")) +
   labs(x = "", y = "", color = "Legend", title = "Inflation and Unemployment Rate (NL)") +
-  scale_color_manual(values = pnl4colours)
+  scale_color_manual(values = pnl4colours) + theme_bw()
 
 pnl5colours <- c("Inflation" = "darkred", "Real Exchange Rate" = "steelblue")
 pnl5 <- ggplot(data = dataNL, aes(x = mdateNL)) + 
   geom_line(aes(y = infNL, color = "Inflation")) +
   geom_line(aes(y = RERNL, color = "Real Exchange Rate")) +
   labs(x = "", y = "", color = "Legend", title = "Inflation and Real Exchange Rate (NL)") +
-  scale_color_manual(values = pnl5colours)
+  scale_color_manual(values = pnl5colours) + theme_bw()
 
 pnl6colours <- c("Inflation" = "darkred", "Real Wages" = "steelblue")
 pnl6 <- ggplot(data = dataNL, aes(x = mdateNL)) + 
   geom_line(aes(y = infNL, color = "Inflation")) +
   geom_line(aes(y = realWNL, color = "Real Wages")) +
   labs(x = "", y = "", color = "Legend", title = "Inflation and Real Wages (NL)") +
-  scale_color_manual(values = pnl6colours)
+  scale_color_manual(values = pnl6colours) + theme_bw()
 
 pnl1
 pnl2
@@ -323,42 +324,42 @@ pcl1 <- ggplot(data = dataCL, aes(x = mdateCL)) +
   geom_line(aes(y = infCL, color = "Inflation")) +
   geom_line(aes(y = intrateCL, color = "Interest Rate")) +
   labs(x = "", y = "", color = "Legend", title = "Inflation and Interest Rate (CL)") +
-  scale_color_manual(values = pcl1colours)
+  scale_color_manual(values = pcl1colours) + theme_bw()
  
 pcl2colours <- c("Inflation" = "darkred", "M2" = "steelblue")
 pcl2 <- ggplot(data = dataCL, aes(x = mdateCL)) + 
   geom_line(aes(y = infCL, color = "Inflation")) +
   geom_line(aes(y = M2CL, color = "M2")) +
   labs(x = "", y = "", color = "Legend", title = "Inflation and M2 Money Supply (CL)") +
-  scale_color_manual(values = pcl2colours)
+  scale_color_manual(values = pcl2colours) + theme_bw()
 
 pcl3colours <- c("Inflation" = "darkred", "Output Gap" = "steelblue")
 pcl3 <- ggplot(data = dataCL, aes(x = mdateCL)) + 
   geom_line(aes(y = infCL, color = "Inflation")) +
   geom_line(aes(y = OutputGapCL, color = "Output Gap")) +
   labs(x = "", y = "", color = "Legend", title = "Inflation and Output Gap (CL)") +
-  scale_color_manual(values = pcl3colours)
+  scale_color_manual(values = pcl3colours) + theme_bw()
 
 pcl4colours <- c("Inflation" = "darkred", "Unemployment Rate" = "steelblue")
 pcl4 <- ggplot(data = dataCL, aes(x = mdateCL)) + 
   geom_line(aes(y = infCL, color = "Inflation")) +
   geom_line(aes(y = urateCL, color = "Unemployment Rate")) +
   labs(x = "", y = "", color = "Legend", title = "Inflation and Unemployment Rate (CL)") +
-  scale_color_manual(values = pcl4colours)
+  scale_color_manual(values = pcl4colours) + theme_bw()
 
 pcl5colours <- c("Inflation" = "darkred", "Real Exchange Rate" = "steelblue")
 pcl5 <- ggplot(data = dataCL, aes(x = mdateCL)) + 
   geom_line(aes(y = infCL, color = "Inflation")) +
   geom_line(aes(y = RERCL, color = "Real Exchange Rate")) +
   labs(x = "", y = "", color = "Legend", title = "Inflation and Real Exchange Rate (CL)") +
-  scale_color_manual(values = pcl5colours)
+  scale_color_manual(values = pcl5colours) + theme_bw()
 
 pcl6colours <- c("Inflation" = "darkred", "Real Wages" = "steelblue")
 pcl6 <- ggplot(data = dataCL, aes(x = mdateCL)) + 
   geom_line(aes(y = infCL, color = "Inflation")) +
   geom_line(aes(y = realWCL, color = "Real Wages")) +
   labs(x = "", y = "", color = "Legend", title = "Inflation and Real Wages (CL)") +
-  scale_color_manual(values = pcl6colours)
+  scale_color_manual(values = pcl6colours) + theme_bw()
 
 pcl1
 pcl2
@@ -413,42 +414,42 @@ pmx1 <- ggplot(data = dataMX, aes(x = mdateMX)) +
   geom_line(aes(y = infMX, color = "Inflation")) +
   geom_line(aes(y = intrateMX, color = "Interest Rate")) +
     labs(x = "", y = "", color = "Legend", title = "Inflation and Interest Rate (MX)") +
-  scale_color_manual(values = pmx1colours)
+  scale_color_manual(values = pmx1colours) + theme_bw()
  
 pmx2colours <- c("Inflation" = "darkred", "M2" = "steelblue")
 pmx2 <- ggplot(data = dataMX, aes(x = mdateMX)) + 
   geom_line(aes(y = infMX, color = "Inflation")) +
   geom_line(aes(y = M2MX, color = "M2")) +
   labs(x = "", y = "", color = "Legend", title = "Inflation and M2 Money Supply (MX)") +
-  scale_color_manual(values = pmx2colours)
+  scale_color_manual(values = pmx2colours) + theme_bw()
 
 pmx3colours <- c("Inflation" = "darkred", "Output Gap" = "steelblue")
 pmx3 <- ggplot(data = dataMX, aes(x = mdateMX)) + 
   geom_line(aes(y = infMX, color = "Inflation")) +
   geom_line(aes(y = OutputGapMX, color = "Output Gap")) +
   labs(x = "", y = "", color = "Legend", title = "Inflation and Output Gap (MX)") +
-  scale_color_manual(values = pmx3colours)
+  scale_color_manual(values = pmx3colours) + theme_bw()
 
 pmx4colours <- c("Inflation" = "darkred", "Unemployment Rate" = "steelblue")
 pmx4 <- ggplot(data = dataMX, aes(x = mdateMX)) + 
   geom_line(aes(y = infMX, color = "Inflation")) +
   geom_line(aes(y = urateMX, color = "Unemployment Rate")) +
   labs(x = "", y = "", color = "Legend", title = "Inflation and Unemployment Rate (MX)") +
-  scale_color_manual(values = pmx4colours)
+  scale_color_manual(values = pmx4colours) + theme_bw()
 
 pmx5colours <- c("Inflation" = "darkred", "Real Exchange Rate" = "steelblue")
 pmx5 <- ggplot(data = dataMX, aes(x = mdateMX)) + 
   geom_line(aes(y = infMX, color = "Inflation")) +
   geom_line(aes(y = RERMX, color = "Real Exchange Rate")) +
   labs(x = "", y = "", color = "Legend", title = "Inflation and Real Exchange Rate (MX)") +
-  scale_color_manual(values = pmx5colours)
+  scale_color_manual(values = pmx5colours) + theme_bw()
 
 pmx6colours <- c("Inflation" = "darkred", "Real Wages" = "steelblue")
 pmx6 <- ggplot(data = dataMX, aes(x = mdateMX)) + 
   geom_line(aes(y = infMX, color = "Inflation")) +
   geom_line(aes(y = realWMX, color = "Real Wages")) +
   labs(x = "", y = "", color = "Legend", title = "Inflation and Real Wages (MX)") +
-  scale_color_manual(values = pmx6colours)
+  scale_color_manual(values = pmx6colours) + theme_bw()
 
 pmx1
 pmx2

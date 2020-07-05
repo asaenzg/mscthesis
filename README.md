@@ -10,9 +10,8 @@ The models used in the project are listed below:
 
     1. Benchmark: an AR(1) model. 
     2. VAR: the VAR's order was selected with the AIC. 
-    3. "Automatic" NN with nnetar: A multivariate perceptron. 
-    4. "Manual" NN with keras: A multivariate RNN with a GRU hidden layer.
+    3. NN with keras: A multivariate RNN with a LSTM hidden layer.
 
 Please, run first the 'data_presentation' file in order to load the data.
 
-At the moment, the NN with keras is still under construction.
+The AR(1) and VAR models were build using RStudio, while the keras NN was developed using Python. The code files are in R Markdown and Jupiter Notebook format (.Rmd and .ipynb, respectively).

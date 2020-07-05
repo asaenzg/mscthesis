@@ -1,4 +1,4 @@
-# MSc. Project
+# MSc. Project: NN Approach to Inflation Forecasting
 
 I compare the performance of a RNN and a VAR model for inflation forecasting across 5 economies: the United States, the Euro Area, the Netherlands, Chile and Mexico.
 

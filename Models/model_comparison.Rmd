@@ -24,15 +24,15 @@ $DM_t = |F_t^i| - |F_t^{-i}|$,
 
 Where $DM$ is the absolute difference, $F_t^i$ is the forecast error in time period $t$ of model $i$ and $F_t^{-i}$ the forecast error in forecast time period $t$ of model $-i$. Note that, if $DM_t > 0$, then model $-i$ is more accurate than model $i$. Finally, if values are leaning towards positive values, then model $i$ is worse than $-i$.
 
-(ii) Average error. An arithmetic mean of forecast errors.
+(ii) Average error. An arithmetic mean of forecast errors. Comments on results using absolute values.
 
-(ii) Present bias average (PBA). Here I penalize the weight of future forecast errors in the average. The idea is that central banks may be more interested in the prediction accuracy of short term inflation. I compute the average as shown below:
+(iii) Present bias average (PBA). Here I penalize the weight of future forecast errors in the average. The idea is that central banks may be more interested in the prediction accuracy of short term inflation. I compute the average as shown below:
 
 $PBA^i = \frac{\sum_{t=1}^T (1 - \frac{t - 1}{T}) |F_t^i|}{T}$,
 
 Where $PBA^i$ is the present bias average of model $i$, $t$ is the number of time periods in the future, $T$ is the number of periods in the forecast and $F_t^i$ is the forecast error in $t$ of model $i$.
 
-(iii) Present punishing average (PPA). In this average, I do the opposite of the PBA. I penalize short term errors in order to measure the accuracy of longer term forecasts.
+(iv) Present punishing average (PPA). In this average, I do the opposite of the PBA. I penalize short term errors in order to measure the accuracy of longer term forecasts.
 
 $PPA^i =  \frac{\sum_{t=1}^T (1 - \frac{T - t}{T}) |F_t^i|}{T}$,
 

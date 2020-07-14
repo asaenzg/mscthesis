@@ -122,8 +122,8 @@ error.var.mx <- as.ts(as.data.frame(error.var.mx, row.names = c(1:12)))
 
 The the null hypothesis and states that both models have the same accuracy. There are three possible alternative hypothesis:
   1. Two Sided: This is the opposite of null hypothesis and states that both models have different accuracy
-  2. Less: The second alternative is model 2 being less accurate than model 1
-  3. Greater: The last alternative is model 2 being more accurate than model 1
+  2. Less: The second alternative is model 1 being less accurate than model 2
+  3. Greater: The last alternative is model 1 being more accurate than model 2
 
 
 
@@ -144,22 +144,22 @@ DM.benchmark.keras.test <- DM.test(pred.benchmark.us,
                                    loss.type = 'AE', #absolute error
                                    h = 8,
                                    c = TRUE, #Harvey-Leybourn-Newbold correction for small samples
-                                   H1 =  "same") #alternative hypothesis
+                                   H1 =  "less") #alternative hypothesis
 
 DM.var.keras.test <- DM.test(pred.var.us, 
                              keras.pred.us,
                              test.inf.us, #observed values
                              loss.type = 'AE', #asolute error
-                             h = 8,
+                             h = 7,
                              c = TRUE, #Harvey-Leybourn-Newbold correction for small samples
-                             H1 =  "same") #alternative hypothesis
+                             H1 =  "less") #alternative hypothesis
 
 DM.benchmark.var.test
 DM.benchmark.keras.test
 DM.var.keras.test
 ```
 
-We start by setting all H1 to "same". This yields that all models are equally accurate for forecasting inflation in the US.
+We start by setting all H1 to "same". This yields that all models are not equally accurate for forecasting inflation in the US. We see from the p-values that the benchmark outperforms the VAR while the LSTM outperforms it.
 
 # 1.2. EA
 ```{r}
@@ -167,7 +167,7 @@ DM.benchmark.var.test <- DM.test(pred.benchmark.ea, #forecast from model1
                                  pred.var.ea, #forecast from model2
                                  test.inf.ea, #observed values
                                  loss.type = 'AE', #absolute error
-                                 h = 6,
+                                 h = 4,
                                  c = TRUE, #Harvey-Leybourn-Newbold correction for small samples
                                  H1 =  "more") #alternative hypothesis
 
@@ -175,15 +175,15 @@ DM.benchmark.keras.test <- DM.test(pred.benchmark.ea,
                                    keras.pred.ea, 
                                    test.inf.ea, #observed values
                                    loss.type = 'AE', #absolute error
-                                   h = 6,
+                                   h = 4,
                                    c = TRUE, #Harvey-Leybourn-Newbold correction for small samples
-                                   H1 =  "less") #alternative hypothesis
+                                   H1 =  "same") #alternative hypothesis
 
 DM.var.keras.test <- DM.test(pred.var.ea, 
                              keras.pred.ea,
                              test.inf.ea, #observed values
                              loss.type = 'AE', #asolute error
-                             h = 6,
+                             h = 4,
                              c = TRUE, #Harvey-Leybourn-Newbold correction for small samples
                              H1 =  "less") #alternative hypothesis
 
@@ -194,7 +194,7 @@ DM.benchmark.keras.test
 DM.var.keras.test
 ```
 
-In the case of EA, the test results show that accuracy is not the same among the models when setting the alpha threshold to 0.05. Finally, the test yields that the benchmark outperforms the VAR and that the NN outperforms the benchmark.
+In the case of EA, the test results show that accuracy is statistically the same across models.
 
 # 1.3. NL
 ```{r}
@@ -212,7 +212,7 @@ DM.benchmark.keras.test <- DM.test(pred.benchmark.nl,
                                    loss.type = 'AE', #absolute error
                                    h = 6,
                                    c = TRUE, #Harvey-Leybourn-Newbold correction for small samples
-                                   H1 =  "same") #alternative hypothesis
+                                   H1 =  "more") #alternative hypothesis
 
 DM.var.keras.test <- DM.test(pred.var.nl, 
                              keras.pred.nl,
@@ -220,7 +220,7 @@ DM.var.keras.test <- DM.test(pred.var.nl,
                              loss.type = 'AE', #asolute error
                              h = 6,
                              c = TRUE, #Harvey-Leybourn-Newbold correction for small samples
-                             H1 =  "same") #alternative hypothesis
+                             H1 =  "more") #alternative hypothesis
 
 #note that higher h yields NaNs
 
@@ -247,7 +247,7 @@ DM.benchmark.keras.test <- DM.test(pred.benchmark.cl,
                                    loss.type = 'AE', #absolute error
                                    h = 6,
                                    c = TRUE, #Harvey-Leybourn-Newbold correction for small samples
-                                   H1 =  "less") #alternative hypothesis
+                                   H1 =  "same") #alternative hypothesis
 
 DM.var.keras.test <- DM.test(pred.var.cl, 
                              keras.pred.cl,
@@ -255,7 +255,7 @@ DM.var.keras.test <- DM.test(pred.var.cl,
                              loss.type = 'AE', #asolute error
                              h = 6,
                              c = TRUE, #Harvey-Leybourn-Newbold correction for small samples
-                             H1 =  "less") #alternative hypothesis
+                             H1 =  "same") #alternative hypothesis
 
 #note that higher h yields NaNs
 
@@ -274,7 +274,7 @@ DM.benchmark.var.test <- DM.test(pred.benchmark.mx, #forecast from model1
                                  loss.type = 'AE', #absolute error
                                  h = 1,
                                  c = TRUE, #Harvey-Leybourn-Newbold correction for small samples
-                                 H1 =  "same") #alternative hypothesis
+                                 H1 =  "less") #alternative hypothesis
 
 DM.benchmark.keras.test <- DM.test(pred.benchmark.mx, 
                                    keras.pred.mx, 
@@ -282,7 +282,7 @@ DM.benchmark.keras.test <- DM.test(pred.benchmark.mx,
                                    loss.type = 'AE', #absolute error
                                    h = 1,
                                    c = TRUE, #Harvey-Leybourn-Newbold correction for small samples
-                                   H1 =  "same") #alternative hypothesis
+                                   H1 =  "less") #alternative hypothesis
 
 DM.var.keras.test <- DM.test(pred.var.mx, 
                              keras.pred.mx,
@@ -290,7 +290,7 @@ DM.var.keras.test <- DM.test(pred.var.mx,
                              loss.type = 'AE', #asolute error
                              h = 1,
                              c = TRUE, #Harvey-Leybourn-Newbold correction for small samples
-                             H1 =  "same") #alternative hypothesis
+                             H1 =  "less") #alternative hypothesis
 
 #note that higher h yields NaNs
 
@@ -310,9 +310,9 @@ Average Error is a simple metric, but it is easy to understand.
 # 2.1. US
 
 ```{r}
-benchmark.mean <- mean(error.benchmark.us)
-var.mean <- mean(error.var.us)
-nn.mean <- mean(keras.error.us)
+benchmark.mean <- mean(abs(error.benchmark.us))
+var.mean <- mean(abs(error.var.us))
+nn.mean <- mean(abs(keras.error.us))
 
 benchmark.mean
 var.mean
@@ -325,9 +325,9 @@ As we can see, output is really similar, specially between the benchmark and the
 # 2.2.EA
 
 ```{r}
-benchmark.mean <- mean(error.benchmark.ea)
-var.mean <- mean(error.var.ea)
-nn.mean <- mean(keras.error.ea)
+benchmark.mean <- mean(abs(error.benchmark.ea))
+var.mean <- mean(abs(error.var.ea))
+nn.mean <- mean(abs(keras.error.ea))
 
 benchmark.mean
 var.mean
@@ -340,9 +340,9 @@ This time, although the diference is still less than 60 bps, the NN was outperfo
 # 2.3. NL
 
 ```{r}
-benchmark.mean <- mean(error.benchmark.nl)
-var.mean <- mean(error.var.nl)
-nn.mean <- mean(keras.error.nl)
+benchmark.mean <- mean(abs(error.benchmark.nl))
+var.mean <- mean(abs(error.var.nl))
+nn.mean <- mean(abs(keras.error.nl))
 
 benchmark.mean
 var.mean
@@ -355,9 +355,9 @@ In the case of NL, the VAR yielded the lower average error, followed by the NN a
 # 2.4. CL
 
 ```{r}
-benchmark.mean <- mean(error.benchmark.cl)
-var.mean <- mean(error.var.cl)
-nn.mean <- mean(keras.error.cl)
+benchmark.mean <- mean(abs(error.benchmark.cl))
+var.mean <- mean(abs(error.var.cl))
+nn.mean <- mean(abs(keras.error.cl))
 
 benchmark.mean
 var.mean
@@ -370,9 +370,9 @@ Again, the differences are almost zero.
 # 2.5. MX
 
 ```{r}
-benchmark.mean <- mean(error.benchmark.mx)
-var.mean <- mean(error.var.mx)
-nn.mean <- mean(keras.error.mx)
+benchmark.mean <- mean(abs(error.benchmark.mx))
+var.mean <- mean(abs(error.var.mx))
+nn.mean <- mean(abs(keras.error.mx))
 
 benchmark.mean
 var.mean

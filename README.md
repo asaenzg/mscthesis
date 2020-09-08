@@ -14,4 +14,4 @@ The models used in the project are listed below:
 
 Please, run first the 'data_presentation' file in order to load the data for the other R Markdown files.
 
-The AR(1) and VAR models were build using RStudio, while the keras NN was developed using Python. The code files are in R Markdown and Jupiter Notebook format (.Rmd and .ipynb, respectively).
+The AR(1) and VAR models were built using RStudio, while the keras NN was developed using Python. The code files are in R Markdown and Jupiter Notebook format (.Rmd and .ipynb, respectively).

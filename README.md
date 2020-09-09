@@ -9,7 +9,7 @@ The 'Models' file contain the data presentation, the different models used and t
 The models used in the project are listed below:
 
     1. Benchmark: an AR(1) model. 
-    2. VAR: the VAR's order was selected with the AIC. 
+    2. VAR: the VAR's order was selected using AIC. 
     3. NN with keras: A multivariate RNN with a LSTM hidden layer.
 
 Please, run first the 'data_presentation' file in order to load the data for the other R Markdown files.
